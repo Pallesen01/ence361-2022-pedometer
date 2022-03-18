@@ -203,6 +203,8 @@ main (void)
         butState = checkButton (UP); //Gets the current state of the 'UP button
 
         if (butState == PUSHED) { //Checks if the 'UP' button has been pushed
+            //Note, button has to be held for a short period to trigger a change in units
+            //Not sure of a way around this.
             unitState ++; //Changes the units
             if (unitState == 3) {
                 //Checks to see if the variable has gone out of range as only 0, 1 and 2
