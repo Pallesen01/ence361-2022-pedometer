@@ -33,7 +33,13 @@
 		<link>
 			<name>ustdlib.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/ti/TivaWare_C_Series-2.1.4.178/utils/ustdlib.c</locationURI>
+			<locationURI>copy_PARENT/ti/TivaWare_C_Series-2.1.4.178/utils/ustdlib.c</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-1-TI_PRODUCTS_DIR%7D</value>
+		</variable>
+	</variableList>
 </projectDescription>

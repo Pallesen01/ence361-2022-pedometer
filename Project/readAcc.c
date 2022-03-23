@@ -28,6 +28,7 @@
 #include "acc.h"
 #include "i2c_driver.h"
 #include "buttons4.h"
+#include "circBufT.h"
 
 typedef struct{
     int16_t x;
@@ -40,7 +41,9 @@ typedef struct{
  **********************************************************/
 // Systick configuration
 #define SYSTICK_RATE_HZ    10
-
+#define BUFF_SIZE 10
+#define NUM_BITS 256
+#define GRAVITY 9.81
 /*******************************************
  *      Local prototypes
  *******************************************/
@@ -177,18 +180,43 @@ getAcclData (void)
 
 
 /********************************************************
+ * Function to calculate the mean value
+ ********************************************************/
+int16_t
+calcMean(int32_t sum, uint16_t i, circBuf_t *buffer)
+{
+    sum = 0; //Resets the sum each time function is called
+    for (i = 0; i < BUFF_SIZE; i++)
+        sum = sum + readCircBuf (buffer); //Adding all the values in the buffer together
+    return ((2 * sum + BUFF_SIZE) / 2 / BUFF_SIZE); //Mean calculation avoiding floating numbers.
+}
+
+/********************************************************
  * main
  ********************************************************/
 int
 main (void)
 {
     vector3_t acceleration_raw;
+    vector3_t acceleration_mean;
+
     uint8_t unitState = 0; //Initially display Raw units
+    int32_t sum;
+    uint8_t butState;
+    uint16_t i;
+
+    circBuf_t x_circ_buff;
+    circBuf_t y_circ_buff;
+    circBuf_t z_circ_buff;
 
     initClock ();
     initAccl ();
     initDisplay ();
     initButtons ();
+
+    initCircBuf (&x_circ_buff, BUFF_SIZE); //Initializing circular buffers for each axis
+    initCircBuf (&y_circ_buff, BUFF_SIZE);
+    initCircBuf (&z_circ_buff, BUFF_SIZE);
 
     OLEDStringDraw ("Accelerometer", 0, 0);
 
@@ -197,7 +225,10 @@ main (void)
         SysCtlDelay (SysCtlClockGet () / 6);    // Approx 2 Hz
         acceleration_raw = getAcclData();
 
-        uint8_t butState;
+        writeCircBuf (&x_circ_buff, acceleration_raw.x);
+        writeCircBuf (&y_circ_buff, acceleration_raw.y);
+        writeCircBuf (&z_circ_buff, acceleration_raw.z);
+
         updateButtons ();
 
         butState = checkButton (UP); //Gets the current state of the 'UP button
@@ -213,21 +244,26 @@ main (void)
             }
         }
 
+        acceleration_mean.x = calcMean(sum, i, &x_circ_buff); //Calculates the mean for each axis using the values stored
+        acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
+        acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
+
+
         if (unitState == 0) {
             //Display units = raw
-            displayUpdate ("Accl", "X", acceleration_raw.x, 1);
-            displayUpdate ("Accl", "Y", acceleration_raw.y, 2); //Put this code in a function to limit repeated code
-            displayUpdate ("Accl", "Z", acceleration_raw.z, 3);
+            displayUpdate ("Accl", "X", acceleration_mean.x, 1);
+            displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
+            displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
         } else if (unitState == 1) {
             //Display units = g
-            displayUpdate ("Accl", "X", acceleration_raw.x / 256, 1); //Turn the magic numbers into constants
-            displayUpdate ("Accl", "Y", acceleration_raw.y / 256, 2);
-            displayUpdate ("Accl", "Z", acceleration_raw.z / 256, 3);
+            displayUpdate ("Accl", "X", acceleration_mean.x / NUM_BITS, 1);
+            displayUpdate ("Accl", "Y", acceleration_mean.y / NUM_BITS, 2); //Changing the mean data stored as the raw data units to g
+            displayUpdate ("Accl", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
         } else {
             //Display units = ms^-2
-            displayUpdate ("Accl", "X", (acceleration_raw.x * 9.81) / 256, 1);
-            displayUpdate ("Accl", "Y", (acceleration_raw.y * 9.81) / 256, 2);
-            displayUpdate ("Accl", "Z", (acceleration_raw.z * 9.81) / 256, 3);
+            displayUpdate ("Accl", "X", (acceleration_mean.x * GRAVITY) / NUM_BITS, 1); //Changing the mean data stored as raw data units to
+            displayUpdate ("Accl", "Y", (acceleration_mean.y * GRAVITY) / NUM_BITS, 2); //ms^-2 by multiplying by gravity before dividing by the
+            displayUpdate ("Accl", "Z", (acceleration_mean.z * GRAVITY) / NUM_BITS, 3); //number of bits.
         }
     }
 }
