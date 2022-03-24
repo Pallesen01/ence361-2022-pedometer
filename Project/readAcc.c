@@ -30,7 +30,7 @@
 #include "buttons4.h"
 #include "circBufT.h"
 
-typedef struct{
+typedef struct vector{
     int16_t x;
     int16_t y;
     int16_t z;
@@ -194,7 +194,7 @@ calcMean(int32_t sum, uint16_t i, circBuf_t *buffer)
 /********************************************************
  * main
  ********************************************************/
-int
+/*int
 main (void)
 {
     vector3_t acceleration_raw;
@@ -266,4 +266,4 @@ main (void)
             displayUpdate ("Accl", "Z", (acceleration_mean.z * GRAVITY) / NUM_BITS, 3); //number of bits.
         }
     }
-}
+}*/

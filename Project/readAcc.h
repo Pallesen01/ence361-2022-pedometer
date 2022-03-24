@@ -26,6 +26,12 @@
 #define NUM_BITS 256
 #define GRAVITY 9.81
 
+typedef struct vector{
+    int16_t x;
+    int16_t y;
+    int16_t z;
+} vector3_t;
+
 void initClock (void);
 
 void initDisplay (void);
@@ -35,3 +41,5 @@ void displayUpdate (char *str1, char *str2, int16_t num, uint8_t charLine);
 void initAccl (void);
 
 vector3_t getAcclData (void);
+
+int16_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);

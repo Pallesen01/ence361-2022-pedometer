@@ -7,13 +7,14 @@
  * Reference orientation can be reset by holding DOWN.
  *
  *    Ben Stewart and Daniel Pallesen
- *    18th of March 2022
+ *    24th of March 2022
  *
  **********************************************************/
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <math.h> // for sqrt() function
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_i2c.h"
@@ -30,13 +31,27 @@
 #include "circBufT.h"
 #include "readAcc.h"
 
+// CONSTANTS
+
+#define PI 3.1415
+
 /********************************************************
  * Function to calculate an angle given an accelerometer value
  ********************************************************/
 int8_t
-calcAngle(int32_t raw_units, int32_t reference_units)
+calcPitch(vector3_t raw_units, vector3_t reference_units)
 {
-    return raw_units/NUM_BITS*10
+       double tan_pitch;
+       double x_square = pow(raw_units.x, 2);
+       double z_square =  pow(raw_units.z, 2);
+       tan_pitch = raw_units.y/sqrt(x_square + z_square);
+       return atan(tan_pitch);
+}
+
+int8_t
+calcRoll(vector3_t raw_units, vector3_t reference_units)
+{
+    return 0; // placeholder
 }
 
 
@@ -50,7 +65,6 @@ main (void)
     vector3_t acceleration_mean;
     vector3_t reference_orientation;
 
-    uint8_t unitState = 0; //Initially display Raw units
     int32_t sum;
     uint8_t butState;
     uint16_t i;
@@ -68,7 +82,7 @@ main (void)
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    OLEDStringDraw ("Accelerometer", 0, 0);
+    OLEDStringDraw ("Orientation", 0, 0);
     reference_orientation = getAcclData();
 
     while (1)
@@ -87,24 +101,21 @@ main (void)
         if (butState == PUSHED) { /*Checks if the 'DOWN' button has been pushed
                                     Note, button has to be held for a short period to trigger.*/
             reference_orientation = getAcclData(); //Resets reference orientation
-            }
         }
+
 
         acceleration_mean.x = calcMean(sum, i, &x_circ_buff); //Calculates the mean for each axis using the values stored
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
-
-        if (unitState == 0) {
-            //Display units = raw
-            displayUpdate ("Accl", "X", acceleration_mean.x, 1);
-            displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
-            displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
-        } else if (unitState == 1) {
-            //Display units = degrees
-            OLEDStringDraw ("Orientation", 0, 0);
-            displayUpdate ("Roll", "X", calcAngle(acceleration_raw.x, reference_orientation.x), 1);
-            displayUpdate ("Pitch", "Y", calcAngle(acceleration_raw.y, reference_orientation.y), 2);
-            // displayUpdate ("Yaw", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
+        //Display units = Radians
+        displayUpdate ("Roll", "X", calcRoll(acceleration_raw, reference_orientation), 1);
+        displayUpdate ("Pitch", "Y", calcPitch(acceleration_raw, reference_orientation), 2);
+        // displayUpdate ("Yaw", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
     }
 }
+
+
+
+
+
