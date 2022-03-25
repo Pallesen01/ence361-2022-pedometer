@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Project</name>
+	<name>team24</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -26,19 +26,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>ustdlib.c</name>
-			<type>1</type>
-<<<<<<< Updated upstream
-			<locationURI>copy_PARENT/ti/TivaWare_C_Series-2.1.4.178/utils/ustdlib.c</locationURI>
-=======
-			<locationURI>copy_PARENT/ti/TivaWare_C_Series-2.2.0.295/utils/ustdlib.c</locationURI>
->>>>>>> Stashed changes
+			<name>OrbitOLED</name>
+			<type>2</type>
+			<location>P:/ENCE361/Week_3_lab_code/OrbitOLED</location>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-1-TI_PRODUCTS_DIR%7D</value>
-		</variable>
-	</variableList>
 </projectDescription>
