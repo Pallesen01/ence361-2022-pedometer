@@ -36,79 +36,15 @@
 /********************************************************
  * main
  ********************************************************/
-/*int
-main (void)
-{
-    vector3_t acceleration_raw;
-    vector3_t acceleration_mean;
-    vector3_t reference_acceleration;
-    int8_t relative_pitch;
-    int8_t relative_roll;
-
-    int32_t sum;
-    uint8_t butState;
-    uint16_t i;
-
-    circBuf_t x_circ_buff;
-    circBuf_t y_circ_buff;
-    circBuf_t z_circ_buff;
-
-    initClock ();
-    initAccl ();
-    initDisplay ();
-    initButtons ();
-
-    initCircBuf (&x_circ_buff, BUFF_SIZE); //Initializing circular buffers for each axis
-    initCircBuf (&y_circ_buff, BUFF_SIZE);
-    initCircBuf (&z_circ_buff, BUFF_SIZE);
-
-    OLEDStringDraw ("Orientation", 0, 0);
-    reference_acceleration = getAcclData();
-    relative_pitch = calcPitch(reference_acceleration, 0);
-    relative_roll = calcRoll(reference_acceleration, 0);
-
-    while (1)
-    {
-        SysCtlDelay (SysCtlClockGet () / 6);    // Approx 2 Hz
-        acceleration_raw = getAcclData();
-
-        writeCircBuf (&x_circ_buff, acceleration_raw.x);
-        writeCircBuf (&y_circ_buff, acceleration_raw.y);
-        writeCircBuf (&z_circ_buff, acceleration_raw.z);
-
-        updateButtons ();
-
-        butState = checkButton (DOWN); //Gets the current state of the DOWN button
-
-        if (butState == PUSHED) { //Checks if the 'DOWN' button has been pushed
-                                   // Note, button has to be held for a short period to trigger.
-            relative_pitch = calcPitch(acceleration_raw, 0);
-            relative_roll = calcRoll(acceleration_raw, 0); //Resets reference orientation
-        }
-
-
-        acceleration_mean.x = calcMean(sum, i, &x_circ_buff); //Calculates the mean for each axis using the values stored
-        acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
-        acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
-
-        //Display units = Degrees
-        displayUpdate ("Pitch", "Y", calcPitch(acceleration_raw, relative_pitch), 1);
-        displayUpdate ("Roll", "X", calcRoll(acceleration_raw, relative_roll), 2);
-
-    }
-}*/
-
-
-/********************************************************
- * main
- ********************************************************/
-/*int
+int
 main (void)
 {
     vector3_t acceleration_raw;
     vector3_t acceleration_mean;
 
-    uint8_t unitState = 0; //Initially display Raw units
+    uint8_t unitState = 4; // Start displaying reference orientation
+    uint8_t prevState = 0;
+    uint32_t slow_timer = 0;
     int32_t sum;
     uint8_t upButState;
     uint8_t downButState;
@@ -129,7 +65,7 @@ main (void)
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    // OLEDStringDraw ("Accelerometer", 0, 0);
+    OLEDStringDraw ("Accelerometer", 0, 0);
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
@@ -150,6 +86,8 @@ main (void)
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
+        // TODO Fix mean acceleration, using raw for now
+        acceleration_mean = acceleration_raw;
 
         updateButtons ();
 
@@ -159,38 +97,59 @@ main (void)
         if (upButState == PUSHED) { //Checks if the 'UP' button has been pushed
             //Note, button has to be held for a short period to trigger a change in units
             //Not sure of a way around this.
-            unitState ++; //Changes the units
-            if (unitState == 3) {
+            if (unitState == 2) {
                 //Checks to see if the variable has gone out of range as only 0, 1 and 2
                 //are valid unitState values. More units could be added in future.
                 unitState = 0;
+            } else {
+                unitState ++; //Changes the units
             }
         }
 
+        // Update timer for reference orientation screen
+        slow_timer++;
         if (downButState == PUSHED) {
             setReferenceOrientation(acceleration_raw, &relative_pitch, &relative_roll);
+            prevState = unitState;
+            unitState = 3;
+            slow_timer = 0;
             // TODO Update display for 3 seconds
+        }
+        // Approx 3 seconds
+        if (slow_timer >= 6 && unitState == 4) {
+            unitState = prevState;
         }
 
 
         if (unitState == 0) {
-            displayUpdate("Accl raw", 0, 0);
+            OLEDStringDraw ("                ", 0, 0);
+            OLEDStringDraw ("Accl raw", 0, 0);
             //Display units = raw
             displayUpdate ("Accl", "X", acceleration_mean.x, 1);
             displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
             displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
         } else if (unitState == 1) {
-            displayUpdate("Accl g", 0, 0);
+            OLEDStringDraw ("                ", 0, 0);
+            OLEDStringDraw ("Accl g", 0, 0);
             //Display units = g
             displayUpdate ("Accl", "X", acceleration_mean.x / NUM_BITS, 1);
             displayUpdate ("Accl", "Y", acceleration_mean.y / NUM_BITS, 2); //Changing the mean data stored as the raw data units to g
             displayUpdate ("Accl", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
-        } else {
-            displayUpdate("Accl ms^-2", 0, 0);
+        } else if (unitState == 2) {
+            OLEDStringDraw ("                ", 0, 0);
+            OLEDStringDraw ("Accl ms^-2", 0, 0);
             //Display units = ms^-2
             displayUpdate ("Accl", "X", (acceleration_mean.x * GRAVITY) / NUM_BITS, 1); //Changing the mean data stored as raw data units to
             displayUpdate ("Accl", "Y", (acceleration_mean.y * GRAVITY) / NUM_BITS, 2); //ms^-2 by multiplying by gravity before dividing by the
             displayUpdate ("Accl", "Z", (acceleration_mean.z * GRAVITY) / NUM_BITS, 3); //number of bits.
+        } else {
+            OLEDStringDraw ("                ", 0, 0);
+            OLEDStringDraw ("Ref Ori", 0, 0);
+            displayUpdate ("Pitch", "Y", relative_pitch, 1);
+            displayUpdate ("Roll", "X", relative_roll, 2);
+            OLEDStringDraw ("                ", 0, 3);
+
+
         }
     }
-}*/
+}
