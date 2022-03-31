@@ -42,7 +42,7 @@ main (void)
     vector3_t acceleration_raw;
     vector3_t acceleration_mean;
 
-    uint8_t unitState = 4; // Start displaying reference orientation
+    uint8_t unitState = 3; // Start displaying reference orientation
     uint8_t prevState = 0;
     uint32_t slow_timer = 0;
     int32_t sum;
@@ -116,7 +116,7 @@ main (void)
             // TODO Update display for 3 seconds
         }
         // Approx 3 seconds
-        if (slow_timer >= 6 && unitState == 4) {
+        if (slow_timer >= 6 && unitState == 3) {
             unitState = prevState;
         }
 
