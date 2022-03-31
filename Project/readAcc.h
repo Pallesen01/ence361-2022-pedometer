@@ -12,6 +12,8 @@
  *
  **********************************************************/
 
+#ifndef READACC_H_
+#define READACC_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -43,3 +45,5 @@ void initAccl (void);
 vector3_t getAcclData (void);
 
 int16_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
+
+#endif /* READACC_H_ */
