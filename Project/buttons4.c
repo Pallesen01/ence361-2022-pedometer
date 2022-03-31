@@ -24,6 +24,11 @@
 #include "driverlib/debug.h"
 #include "inc/tm4c123gh6pm.h"  // Board specific defines (for PF0)
 #include "buttons4.h"
+#include "readAcc.h"
+#include "acc.h"
+#include "readRollPitch.h"
+
+
 
 
 // *******************************************************
@@ -138,3 +143,43 @@ checkButton (uint8_t butName)
 	return NO_CHANGE;
 }
 
+void upButtonIntHandler (void)
+{
+    //change units
+    g_state += 1;
+    if (g_state > 2) {
+        g_state = 0;
+    }
+
+    vector3_t accData = getAcclData();
+    displayAcc(g_state, accData,0,0);
+
+
+    //display accel
+    GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
+}
+
+void downButtonIntHandler (void)
+{
+    GPIOIntDisable(UP_BUT_PORT_BASE, UP_BUT_PIN);
+    //display acc
+    g_prev_state = g_state;
+    g_state = 3;
+    vector3_t accData = getAcclData();
+    int8_t pitch = setReferencePitch(accData);
+    int8_t roll = setReferenceRoll(accData);
+    displayAcc(g_state, accData, pitch, roll);
+
+    GPIOIntClear(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
+    GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
+    GPIOIntEnable(UP_BUT_PORT_BASE, UP_BUT_PIN);
+}
+
+void initButtInt (void)
+{
+    GPIOIntRegister(UP_BUT_PORT_BASE, upButtonIntHandler);
+    GPIOIntEnable(UP_BUT_PORT_BASE, UP_BUT_PIN);
+
+    GPIOIntRegister(DOWN_BUT_PORT_BASE, downButtonIntHandler);
+    GPIOIntEnable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
+}

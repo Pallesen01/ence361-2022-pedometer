@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "circBufT.h"
 
 /**********************************************************
  * Constants
@@ -29,10 +30,13 @@
 #define GRAVITY 9.81
 
 typedef struct vector{
-    int16_t x;
-    int16_t y;
-    int16_t z;
+    int32_t x;
+    int32_t y;
+    int32_t z;
 } vector3_t;
+
+
+void refDelay (void);
 
 void initClock (void);
 
@@ -44,6 +48,8 @@ void initAccl (void);
 
 vector3_t getAcclData (void);
 
-int16_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
+uint16_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
+
+void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll);
 
 #endif /* READACC_H_ */

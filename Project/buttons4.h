@@ -17,6 +17,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+extern uint32_t g_state;
+extern uint32_t g_prev_state;
+
 //*****************************************************************************
 // Constants
 //*****************************************************************************
@@ -70,5 +73,9 @@ updateButtons (void);
 // enumeration butStates, excluding 'NUM_BUTS'. Safe under interrupt.
 uint8_t
 checkButton (uint8_t butName);
+
+void initButtInt (void);
+void upButtonIntHandler (void);
+void downButtonIntHandler (void);
 
 #endif /*BUTTONS_H_*/

@@ -24,6 +24,8 @@
 #define ACCL                2
 #define ACCL_ADDR           0x1D
 
+
+
 #define ACCL_INT            0x2E
 #define ACCL_OFFSET_X       0x1E
 #define ACCL_OFFSET_Y       0x1F

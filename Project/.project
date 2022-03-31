@@ -28,12 +28,7 @@
 		<link>
 			<name>OrbitOLED</name>
 			<type>2</type>
-			<location>P:/ENCE361/Week_3_lab_code/OrbitOLED</location>
-		</link>
-		<link>
-			<name>ustdlib.c</name>
-			<type>1</type>
-			<location>C:/ti/TivaWare_C_Series-2.2.0.295/utils/ustdlib.c</location>
+			<location>C:/Users/stewa/workspace_v11/labs/OrbitOLED</location>
 		</link>
 	</linkedResources>
 </projectDescription>

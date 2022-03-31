@@ -2,7 +2,7 @@
  *
  * main
  *
- * Contains the main function lopo for the program
+ * Contains the main function loop for the program
  *
  *    Ben Stewart and Daniel Pallesen
  *    31tst of March 2022
@@ -24,6 +24,7 @@
 #include "driverlib/gpio.h"
 #include "driverlib/i2c.h"
 #include "../OrbitOLED/OrbitOLEDInterface.h"
+#include "driverlib/interrupt.h"
 #include "utils/ustdlib.h"
 #include "acc.h"
 #include "i2c_driver.h"
@@ -32,6 +33,8 @@
 #include "readAcc.h"
 #include "readRollPitch.h"
 
+uint32_t g_state;
+uint32_t g_prev_state;
 
 /********************************************************
  * main
@@ -41,16 +44,10 @@ main (void)
 {
     vector3_t acceleration_raw;
     vector3_t acceleration_mean;
+    //uint8_t unitState = 3; // Start displaying reference orientation
 
-    uint8_t unitState = 3; // Start displaying reference orientation
-    uint8_t prevState = 0;
-    uint32_t slow_timer = 0;
     int32_t sum;
-    uint8_t upButState;
-    uint8_t downButState;
     uint16_t i;
-    int8_t relative_pitch;
-    int8_t relative_roll;
 
     circBuf_t x_circ_buff;
     circBuf_t y_circ_buff;
@@ -60,20 +57,25 @@ main (void)
     initAccl ();
     initDisplay ();
     initButtons ();
+    initButtInt ();
 
     initCircBuf (&x_circ_buff, BUFF_SIZE); //Initializing circular buffers for each axis
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    OLEDStringDraw ("Accelerometer", 0, 0);
+    //OLEDStringDraw ("Accelerometer", 0, 0);
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
-    setReferenceOrientation(acceleration_raw, &relative_pitch, &relative_roll);
+    int8_t pitch = setReferencePitch(acceleration_raw);
+    int8_t roll = setReferenceRoll(acceleration_raw);
+    g_state = 3;
+
 
     while (1)
     {
         SysCtlDelay (SysCtlClockGet () / 6);    // Approx 2 Hz
+        //displayAcc(g_state, acceleration_raw);
         acceleration_raw = getAcclData();
 
         // Write acceleration values to circular buffers
@@ -89,67 +91,18 @@ main (void)
         // TODO Fix mean acceleration, using raw for now
         acceleration_mean = acceleration_raw;
 
-        updateButtons ();
+        displayAcc(g_state, acceleration_mean, 0, 0);
 
-        upButState = checkButton (UP); //Gets the current state of the 'UP button
-        downButState = checkButton (DOWN); //Gets the current state of the DOWN button
-
-        if (upButState == PUSHED) { //Checks if the 'UP' button has been pushed
-            //Note, button has to be held for a short period to trigger a change in units
-            //Not sure of a way around this.
-            if (unitState == 2) {
-                //Checks to see if the variable has gone out of range as only 0, 1 and 2
-                //are valid unitState values. More units could be added in future.
-                unitState = 0;
-            } else {
-                unitState ++; //Changes the units
-            }
-        }
 
         // Update timer for reference orientation screen
-        slow_timer++;
-        if (downButState == PUSHED) {
-            setReferenceOrientation(acceleration_raw, &relative_pitch, &relative_roll);
+
+        /*if (downButState == PUSHED) {
+
             prevState = unitState;
             unitState = 3;
             slow_timer = 0;
             // TODO Update display for 3 seconds
-        }
+        }*/
         // Approx 3 seconds
-        if (slow_timer >= 6 && unitState == 3) {
-            unitState = prevState;
-        }
-
-
-        if (unitState == 0) {
-            OLEDStringDraw ("                ", 0, 0);
-            OLEDStringDraw ("Accl raw", 0, 0);
-            //Display units = raw
-            displayUpdate ("Accl", "X", acceleration_mean.x, 1);
-            displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
-            displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
-        } else if (unitState == 1) {
-            OLEDStringDraw ("                ", 0, 0);
-            OLEDStringDraw ("Accl g", 0, 0);
-            //Display units = g
-            displayUpdate ("Accl", "X", acceleration_mean.x / NUM_BITS, 1);
-            displayUpdate ("Accl", "Y", acceleration_mean.y / NUM_BITS, 2); //Changing the mean data stored as the raw data units to g
-            displayUpdate ("Accl", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
-        } else if (unitState == 2) {
-            OLEDStringDraw ("                ", 0, 0);
-            OLEDStringDraw ("Accl ms^-2", 0, 0);
-            //Display units = ms^-2
-            displayUpdate ("Accl", "X", (acceleration_mean.x * GRAVITY) / NUM_BITS, 1); //Changing the mean data stored as raw data units to
-            displayUpdate ("Accl", "Y", (acceleration_mean.y * GRAVITY) / NUM_BITS, 2); //ms^-2 by multiplying by gravity before dividing by the
-            displayUpdate ("Accl", "Z", (acceleration_mean.z * GRAVITY) / NUM_BITS, 3); //number of bits.
-        } else {
-            OLEDStringDraw ("                ", 0, 0);
-            OLEDStringDraw ("Ref Ori", 0, 0);
-            displayUpdate ("Pitch", "Y", relative_pitch, 1);
-            displayUpdate ("Roll", "X", relative_roll, 2);
-            OLEDStringDraw ("                ", 0, 3);
-
-
-        }
     }
 }

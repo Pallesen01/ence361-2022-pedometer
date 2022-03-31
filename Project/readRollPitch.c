@@ -36,6 +36,10 @@
 #define PI 3.1415
 #define RAD_TO_DEG 57.3
 
+
+int8_t relative_pitch;
+int8_t relative_roll;
+
 /********************************************************
  * Function to return the sign of an integer
  ********************************************************/
@@ -77,11 +81,18 @@ calcRoll(vector3_t acceleration, int8_t relative_roll)
 /********************************************************
  * resetReferenceOrientation
  ********************************************************/
-void
-setReferenceOrientation(vector3_t acceleration, int8_t* pitch_ptr, int8_t* roll_ptr)
+int8_t
+setReferenceRoll(vector3_t acceleration)
 {
-    *pitch_ptr = calcPitch(acceleration, 0);
-    *roll_ptr = calcRoll(acceleration, 0);
+    int8_t relativeRoll = calcRoll(acceleration, 0);
+    return relativeRoll;
+}
+
+int8_t
+setReferencePitch(vector3_t acceleration)
+{
+    int8_t relativeRoll = calcPitch(acceleration, 0);
+    return relativeRoll;
 }
 
 

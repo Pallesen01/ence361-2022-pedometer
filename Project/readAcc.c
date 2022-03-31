@@ -23,6 +23,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
 #include "driverlib/i2c.h"
+#include "driverlib/interrupt.h"
+#include "inc/hw_ints.h"
 #include "../OrbitOLED/OrbitOLEDInterface.h"
 #include "utils/ustdlib.h"
 #include "acc.h"
@@ -30,12 +32,13 @@
 #include "buttons4.h"
 #include "circBufT.h"
 
-
 typedef struct vector{
-    int16_t x;
-    int16_t y;
-    int16_t z;
+    int32_t x;
+    int32_t y;
+    int32_t z;
 } vector3_t;
+
+
 
 /**********************************************************
  * Constants
@@ -48,6 +51,7 @@ typedef struct vector{
 /*******************************************
  *      Local prototypes
  *******************************************/
+
 void initClock (void);
 void initDisplay (void);
 void displayUpdate (char *str1, char *str2, int16_t num, uint8_t charLine);
@@ -77,6 +81,18 @@ initDisplay (void)
     OLEDInitialise ();
 }
 
+void
+refDelay (void)
+{
+
+    uint32_t slow_timer = 0;
+    while (slow_timer < 7) {
+        SysCtlDelay (SysCtlClockGet () / 6);
+        slow_timer ++;
+    }
+    g_state = g_prev_state;
+}
+
 //*****************************************************************************
 // Function to display a changing message on the display.
 // The display has 4 rows of 16 characters, with 0, 0 at top left.
@@ -94,6 +110,42 @@ displayUpdate (char *str1, char *str2, int16_t num, uint8_t charLine)
     // Update line on display.
     OLEDStringDraw (text_buffer, 0, charLine);
 }
+
+void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll)
+{
+
+    if (state == 0) {
+        OLEDStringDraw ("                ", 0, 0);
+        OLEDStringDraw ("Accl raw", 0, 0);
+        //Display units = raw
+        displayUpdate ("Accl", "X", acceleration_mean.x, 1);
+        displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
+        displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
+    } else if (state == 1) {
+        OLEDStringDraw ("                ", 0, 0);
+        OLEDStringDraw ("Accl g", 0, 0);
+        //Display units = g
+        displayUpdate ("Accl", "X", acceleration_mean.x / NUM_BITS, 1);
+        displayUpdate ("Accl", "Y", acceleration_mean.y / NUM_BITS, 2); //Changing the mean data stored as the raw data units to g
+        displayUpdate ("Accl", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
+    } else if (state == 2) {
+        OLEDStringDraw ("                ", 0, 0);
+        OLEDStringDraw ("Accl ms^-2", 0, 0);
+        //Display units = ms^-2
+        displayUpdate ("Accl", "X", (acceleration_mean.x * GRAVITY) / NUM_BITS, 1); //Changing the mean data stored as raw data units to
+        displayUpdate ("Accl", "Y", (acceleration_mean.y * GRAVITY) / NUM_BITS, 2); //ms^-2 by multiplying by gravity before dividing by the
+        displayUpdate ("Accl", "Z", (acceleration_mean.z * GRAVITY) / NUM_BITS, 3); //number of bits.
+    } else if (state == 3) {
+        OLEDStringDraw ("                ", 0, 0);
+        OLEDStringDraw ("Ref Ori", 0, 0);
+        displayUpdate ("Pitch", "Y", relative_pitch, 1);
+        displayUpdate ("Roll", "X", relative_roll, 2);
+        OLEDStringDraw ("                ", 0, 3);
+        refDelay();
+    }
+}
+
+
 
 /*********************************************************
  * initAccl
@@ -183,8 +235,9 @@ getAcclData (void)
 /********************************************************
  * Function to calculate the mean value
  ********************************************************/
-int16_t
-calcMean(int32_t sum, uint16_t i, circBuf_t *buffer)
+
+uint16_t
+calcMean(uint16_t sum, uint16_t i, circBuf_t *buffer)
 {
     sum = 0; //Resets the sum each time function is called
     for (i = 0; i < BUFF_SIZE; i++)
@@ -193,4 +246,3 @@ calcMean(int32_t sum, uint16_t i, circBuf_t *buffer)
     }
     return ((2 * sum + BUFF_SIZE) / 2 / BUFF_SIZE); //Mean calculation avoiding floating numbers.
 }
-
