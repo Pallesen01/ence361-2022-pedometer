@@ -67,7 +67,7 @@ calcRoll(vector3_t acceleration, int8_t relative_roll)
     double x_square = pow(acceleration.x, 2);
     double z_square =  pow(acceleration.z, 2);
 
-    return (atan2(-raw_acceleration.x, raw_acceleration.z)*RAD_TO_DEG) - relative_roll;
+    return (atan2(-acceleration.x, acceleration.z)*RAD_TO_DEG) - relative_roll;
 
 }
 
