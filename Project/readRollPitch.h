@@ -20,5 +20,6 @@ int8_t calcPitch(vector3_t acceleration, int8_t relative_pitch);
 
 int8_t calcRoll(vector3_t acceleration, int8_t relative_roll);
 
+void setReferenceOrientation(vector3_t acceleration, int8_t* pitch_ptr, int8_t* roll_ptr);
 
 #endif /* READROLLPITCH_H_ */

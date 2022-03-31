@@ -36,7 +36,7 @@
 /********************************************************
  * main
  ********************************************************/
-int
+/*int
 main (void)
 {
     vector3_t acceleration_raw;
@@ -80,11 +80,10 @@ main (void)
 
         butState = checkButton (DOWN); //Gets the current state of the DOWN button
 
-        if (butState == PUSHED) { /*Checks if the 'DOWN' button has been pushed
-                                    Note, button has to be held for a short period to trigger.*/
-            reference_acceleration = getAcclData();
-            relative_pitch = calcPitch(reference_acceleration, 0);
-            relative_roll = calcRoll(reference_acceleration, 0); //Resets reference orientation
+        if (butState == PUSHED) { //Checks if the 'DOWN' button has been pushed
+                                   // Note, button has to be held for a short period to trigger.
+            relative_pitch = calcPitch(acceleration_raw, 0);
+            relative_roll = calcRoll(acceleration_raw, 0); //Resets reference orientation
         }
 
 
@@ -97,7 +96,7 @@ main (void)
         displayUpdate ("Roll", "X", calcRoll(acceleration_raw, relative_roll), 2);
 
     }
-}
+}*/
 
 
 /********************************************************
@@ -111,8 +110,11 @@ main (void)
 
     uint8_t unitState = 0; //Initially display Raw units
     int32_t sum;
-    uint8_t butState;
+    uint8_t upButState;
+    uint8_t downButState;
     uint16_t i;
+    int8_t relative_pitch;
+    int8_t relative_roll;
 
     circBuf_t x_circ_buff;
     circBuf_t y_circ_buff;
@@ -127,22 +129,34 @@ main (void)
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    OLEDStringDraw ("Accelerometer", 0, 0);
+    // OLEDStringDraw ("Accelerometer", 0, 0);
+
+    // Set reference orientation on start
+    acceleration_raw = getAcclData();
+    setReferenceOrientation(acceleration_raw, &relative_pitch, &relative_roll);
 
     while (1)
     {
         SysCtlDelay (SysCtlClockGet () / 6);    // Approx 2 Hz
         acceleration_raw = getAcclData();
 
+        // Write acceleration values to circular buffers
         writeCircBuf (&x_circ_buff, acceleration_raw.x);
         writeCircBuf (&y_circ_buff, acceleration_raw.y);
         writeCircBuf (&z_circ_buff, acceleration_raw.z);
 
+        // Calculate mean acceleration along each axis
+        acceleration_mean.x = calcMean(sum, i, &x_circ_buff); //Calculates the mean for each axis using the values stored
+        acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
+        acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
+
+
         updateButtons ();
 
-        butState = checkButton (UP); //Gets the current state of the 'UP button
+        upButState = checkButton (UP); //Gets the current state of the 'UP button
+        downButState = checkButton (DOWN); //Gets the current state of the DOWN button
 
-        if (butState == PUSHED) { //Checks if the 'UP' button has been pushed
+        if (upButState == PUSHED) { //Checks if the 'UP' button has been pushed
             //Note, button has to be held for a short period to trigger a change in units
             //Not sure of a way around this.
             unitState ++; //Changes the units
@@ -153,22 +167,26 @@ main (void)
             }
         }
 
-        acceleration_mean.x = calcMean(sum, i, &x_circ_buff); //Calculates the mean for each axis using the values stored
-        acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
-        acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
+        if (downButState == PUSHED) {
+            setReferenceOrientation(acceleration_raw, &relative_pitch, &relative_roll);
+            // TODO Update display for 3 seconds
+        }
 
 
         if (unitState == 0) {
+            displayUpdate("Accl raw", 0, 0);
             //Display units = raw
             displayUpdate ("Accl", "X", acceleration_mean.x, 1);
             displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
             displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
         } else if (unitState == 1) {
+            displayUpdate("Accl g", 0, 0);
             //Display units = g
             displayUpdate ("Accl", "X", acceleration_mean.x / NUM_BITS, 1);
             displayUpdate ("Accl", "Y", acceleration_mean.y / NUM_BITS, 2); //Changing the mean data stored as the raw data units to g
             displayUpdate ("Accl", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
         } else {
+            displayUpdate("Accl ms^-2", 0, 0);
             //Display units = ms^-2
             displayUpdate ("Accl", "X", (acceleration_mean.x * GRAVITY) / NUM_BITS, 1); //Changing the mean data stored as raw data units to
             displayUpdate ("Accl", "Y", (acceleration_mean.y * GRAVITY) / NUM_BITS, 2); //ms^-2 by multiplying by gravity before dividing by the
