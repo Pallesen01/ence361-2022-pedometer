@@ -44,7 +44,6 @@ main (void)
       {
     vector3_t acceleration_raw;
     vector3_t acceleration_mean;
-    //uint8_t unitState = 3; // Start displaying reference orientation
 
     int32_t sum;
     uint16_t i;
@@ -63,13 +62,14 @@ main (void)
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    //OLEDStringDraw ("Accelerometer", 0, 0);
+    uint32_t startUpSteps = 1234;
+    uint8_t startUpKM = 1;
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
     int8_t pitch = setReferencePitch(acceleration_raw);
     int8_t roll = setReferenceRoll(acceleration_raw);
-    g_state = 3;
+    g_state = 4;
 
 
     while (1)
@@ -88,6 +88,6 @@ main (void)
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
-        displayAcc(g_state, acceleration_mean, 0, 0);
+        displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpKM);
     }
 }

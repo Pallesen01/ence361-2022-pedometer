@@ -50,6 +50,6 @@ vector3_t getAcclData (void);
 
 int32_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
 
-void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll);
+void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint8_t distanceSinceReset);
 
 #endif /* READACC_H_ */

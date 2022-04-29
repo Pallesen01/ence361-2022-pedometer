@@ -111,7 +111,7 @@ displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine)
     OLEDStringDraw (text_buffer, 0, charLine);
 }
 
-void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll)
+void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint8_t distanceSinceReset)
 {
 
     if (state == 0) {
@@ -142,6 +142,22 @@ void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pi
         displayUpdate ("Roll", "X", relative_roll, 2);
         OLEDStringDraw ("                ", 0, 3);
         refDelay();
+    } else if (state == 4)  {
+        OLEDStringDraw ("   Steps since  ", 0, 0);
+        OLEDStringDraw ("   last time    ", 0, 1);
+        OLEDStringDraw ("                ", 0, 2);
+        displayUpdate ("Steps", "=", stepsSinceReset, 3);
+    } else if (state == 5) {
+        OLEDStringDraw (" distance since ", 0, 0);
+        OLEDStringDraw ("   last time    ", 0, 1);
+        OLEDStringDraw ("                ", 0, 2);
+        displayUpdate ("dist", "=", distanceSinceReset, 3);
+        OLEDStringDraw ("km", 10, 3);
+    } else if (state == 6) {
+        OLEDStringDraw (" Set goal TODO ", 0, 0);
+        OLEDStringDraw ("                ", 0, 1);
+        OLEDStringDraw ("                ", 0, 2);
+        OLEDStringDraw ("                ", 0, 3);
     }
 }
 

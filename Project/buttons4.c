@@ -152,7 +152,7 @@ void upButtonIntHandler (void)
     }
 
     vector3_t accData = getAcclData();
-    displayAcc(g_state, accData,0,0);
+    displayAcc(g_state, accData,0,0,0,0);
     //display accel
     GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
 }
@@ -166,11 +166,19 @@ void downButtonIntHandler (void)
     vector3_t accData = getAcclData();
     int8_t pitch = setReferencePitch(accData);
     int8_t roll = setReferenceRoll(accData);
-    displayAcc(g_state, accData, pitch, roll);
+    displayAcc(g_state, accData, pitch, roll,0,0);
 
     GPIOIntClear(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
-    GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
-    GPIOIntEnable(UP_BUT_PORT_BASE, UP_BUT_PIN);
+}
+
+void leftButtonIntHandler (void)
+{
+    g_state += 1;
+    if (g_state > 6)
+    {
+        g_state = 4;
+    }
+    GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
 }
 
 void initButtInt (void)
@@ -180,4 +188,7 @@ void initButtInt (void)
 
     GPIOIntRegister(DOWN_BUT_PORT_BASE, downButtonIntHandler);
     GPIOIntEnable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
+
+    GPIOIntRegister(LEFT_BUT_PORT_BASE, leftButtonIntHandler);
+    GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
 }
