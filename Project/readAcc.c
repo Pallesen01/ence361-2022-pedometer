@@ -33,9 +33,9 @@
 #include "circBufT.h"
 
 typedef struct vector{
-    int32_t x;
-    int32_t y;
-    int32_t z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } vector3_t;
 
 
@@ -54,7 +54,7 @@ typedef struct vector{
 
 void initClock (void);
 void initDisplay (void);
-void displayUpdate (char *str1, char *str2, int16_t num, uint8_t charLine);
+void displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine);
 void initAccl (void);
 vector3_t getAcclData (void);
 
@@ -98,7 +98,7 @@ refDelay (void)
 // The display has 4 rows of 16 characters, with 0, 0 at top left.
 //*****************************************************************************
 void
-displayUpdate (char *str1, char *str2, int16_t num, uint8_t charLine)
+displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine)
 {
     char text_buffer[17];           //Display fits 16 characters wide.
 
@@ -236,13 +236,14 @@ getAcclData (void)
  * Function to calculate the mean value
  ********************************************************/
 
-uint16_t
-calcMean(uint16_t sum, uint16_t i, circBuf_t *buffer)
+int32_t
+calcMean(int32_t sum, uint16_t i, circBuf_t *buffer)
 {
     sum = 0; //Resets the sum each time function is called
     for (i = 0; i < BUFF_SIZE; i++)
     {
         sum = sum + readCircBuf (buffer); //Adding all the values in the buffer together
     }
-    return ((2 * sum + BUFF_SIZE) / 2 / BUFF_SIZE); //Mean calculation avoiding floating numbers.
+    return (2 * sum + BUFF_SIZE) / 2 / BUFF_SIZE; //Mean calculation avoiding floating numbers.
+
 }

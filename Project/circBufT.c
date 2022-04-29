@@ -18,14 +18,15 @@
 // the start of the buffer.  Dynamically allocate and clear the the 
 // memory and return a pointer for the data.  Return NULL if 
 // allocation fails.
-uint32_t *
-initCircBuf (circBuf_t *buffer, uint32_t size)
+int32_t *
+initCircBuf (circBuf_t *buffer, int32_t size)
 {
+    uint8_t i = 0;
 	buffer->windex = 0;
 	buffer->rindex = 0;
 	buffer->size = size;
-	buffer->data = 
-        (uint32_t *) calloc (size, sizeof(uint32_t));
+	buffer->data =
+        (int32_t *) calloc (size, sizeof(int32_t));
 	return buffer->data;
 }
    // Note use of calloc() to clear contents.
@@ -46,10 +47,10 @@ writeCircBuf (circBuf_t *buffer, uint32_t entry)
 // readCircBuf: return entry at the current rindex location,
 // advance rindex, modulo (buffer size). The function deos not check
 // if reading has advanced ahead of writing.
-uint32_t
+int32_t
 readCircBuf (circBuf_t *buffer)
 {
-	uint32_t entry;
+	int32_t entry;
 	
 	entry = buffer->data[buffer->rindex];
 	buffer->rindex++;

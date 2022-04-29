@@ -30,9 +30,9 @@
 #define GRAVITY 9.81
 
 typedef struct vector{
-    int32_t x;
-    int32_t y;
-    int32_t z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } vector3_t;
 
 
@@ -42,13 +42,13 @@ void initClock (void);
 
 void initDisplay (void);
 
-void displayUpdate (char *str1, char *str2, int16_t num, uint8_t charLine);
+void displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine);
 
 void initAccl (void);
 
 vector3_t getAcclData (void);
 
-uint16_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
+int32_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
 
 void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll);
 

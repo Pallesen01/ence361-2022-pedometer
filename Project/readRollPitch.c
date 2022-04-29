@@ -91,8 +91,8 @@ setReferenceRoll(vector3_t acceleration)
 int8_t
 setReferencePitch(vector3_t acceleration)
 {
-    int8_t relativeRoll = calcPitch(acceleration, 0);
-    return relativeRoll;
+    int8_t relativePitch = calcPitch(acceleration, 0);
+    return relativePitch;
 }
 
 

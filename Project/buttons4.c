@@ -153,8 +153,6 @@ void upButtonIntHandler (void)
 
     vector3_t accData = getAcclData();
     displayAcc(g_state, accData,0,0);
-
-
     //display accel
     GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
 }

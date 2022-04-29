@@ -41,7 +41,7 @@ uint32_t g_prev_state;
  ********************************************************/
 int
 main (void)
-{
+      {
     vector3_t acceleration_raw;
     vector3_t acceleration_mean;
     //uint8_t unitState = 3; // Start displaying reference orientation
@@ -49,9 +49,9 @@ main (void)
     int32_t sum;
     uint16_t i;
 
-    circBuf_t x_circ_buff;
-    circBuf_t y_circ_buff;
-    circBuf_t z_circ_buff;
+    static circBuf_t x_circ_buff;
+    static circBuf_t y_circ_buff;
+    static circBuf_t z_circ_buff;
 
     initClock ();
     initAccl ();
@@ -74,7 +74,7 @@ main (void)
 
     while (1)
     {
-        SysCtlDelay (SysCtlClockGet () / 6);    // Approx 2 Hz
+        SysCtlDelay (SysCtlClockGet () / 6);    // Approx 2
         //displayAcc(g_state, acceleration_raw);
         acceleration_raw = getAcclData();
 
@@ -88,21 +88,6 @@ main (void)
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
-        // TODO Fix mean acceleration, using raw for now
-        acceleration_mean = acceleration_raw;
-
         displayAcc(g_state, acceleration_mean, 0, 0);
-
-
-        // Update timer for reference orientation screen
-
-        /*if (downButState == PUSHED) {
-
-            prevState = unitState;
-            unitState = 3;
-            slow_timer = 0;
-            // TODO Update display for 3 seconds
-        }*/
-        // Approx 3 seconds
     }
 }
