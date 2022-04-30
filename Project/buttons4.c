@@ -145,14 +145,18 @@ checkButton (uint8_t butName)
 
 void upButtonIntHandler (void)
 {
+    uint32_t totalSteps = 5789;
+    uint32_t totalDistance = 3200;
+    uint32_t startUpSteps = 1234;
+    uint32_t startUpDistance = 1000;
     //change units
-    g_state += 1;
-    if (g_state > 2) {
-        g_state = 0;
+    g_units += 1;
+    if (g_units > 1) {
+        g_units = 0;
     }
 
     vector3_t accData = getAcclData();
-    displayAcc(g_state, accData,0,0,0,0,0,0);
+    displayAcc(accData,0,0,startUpSteps,startUpDistance,totalSteps,totalDistance);
     //display accel
     GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
 }
@@ -161,71 +165,14 @@ void downButtonIntHandler (void)
 {
     GPIOIntDisable(UP_BUT_PORT_BASE, UP_BUT_PIN);
     //display acc
-    g_prev_state = g_state;
+
     g_state = 3;
     vector3_t accData = getAcclData();
     int8_t pitch = setReferencePitch(accData);
     int8_t roll = setReferenceRoll(accData);
-    displayAcc(g_state, accData, pitch, roll,0,0,0,0);
+    displayAcc(accData, pitch, roll,0,0,0,0);
 
     GPIOIntClear(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
-}
-
-void leftButtonIntHandler (void)
-{
-    GPIOIntDisable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
-    uint32_t startUpSteps = 1234;
-    uint32_t startUpDistance = 1000;
-    vector3_t accData = getAcclData();
-
-    if (g_state == 4) {
-        g_state = 5;
-    } else if (g_state == 5) {
-        g_state = 6;
-    } else if (g_state == 6) {
-        g_state = 4;
-    } else if (g_state == 7) {
-        g_state = 6;
-    } else if (g_state == 8) {
-        g_state = 5;
-    }
-
-    displayAcc(g_state, accData, 0, 0,startUpSteps,startUpDistance,0,0);
-
-    SysCtlDelay (SysCtlClockGet () / 15);
-    GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-    GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
-    GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
-}
-
-void rightButtonIntHandler (void)
-{
-    GPIOIntDisable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-    uint32_t totalSteps = 5789;
-    uint32_t totalDistance = 3200;
-
-    vector3_t accData = getAcclData();
-
-    if (g_state == 4) {
-        g_state = 6;
-    } else if (g_state == 5) {
-        g_state = 8;
-    } else if (g_state == 6) {
-        g_state = 7;
-    } else if (g_state == 7) {
-        g_state = 8;
-    } else if (g_state == 8) {
-        g_state = 6;
-    }
-
-    displayAcc(g_state, accData, 0, 0,0,0,totalSteps,totalDistance);
-
-    SysCtlDelay (SysCtlClockGet () / 15);
-    GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
-    GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-    GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-
-
 }
 
 void (sidewaysButtonHandler) (void)
@@ -249,7 +196,7 @@ void (sidewaysButtonHandler) (void)
             g_state = 6;
         }
 
-        displayAcc(g_state, accData, 0, 0,0,0,totalSteps,totalDistance);
+        displayAcc(accData, 0, 0,0,0,totalSteps,totalDistance);
 
         SysCtlDelay (SysCtlClockGet () / 15);
         GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
@@ -273,7 +220,7 @@ void (sidewaysButtonHandler) (void)
             g_state = 5;
         }
 
-        displayAcc(g_state, accData, 0, 0,startUpSteps,startUpDistance,0,0);
+        displayAcc(accData, 0, 0,startUpSteps,startUpDistance,0,0);
 
         SysCtlDelay (SysCtlClockGet () / 15);
         GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
@@ -293,9 +240,6 @@ void initButtInt (void)
     GPIOIntRegister(RIGHT_BUT_PORT_BASE, sidewaysButtonHandler);
     GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
     GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-
-    /*GPIOIntRegister(LEFT_BUT_PORT_BASE, leftButtonIntHandler);
-    GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);*/
 
 
 }

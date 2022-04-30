@@ -13,6 +13,7 @@
  **********************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "inc/hw_memmap.h"
@@ -90,7 +91,7 @@ refDelay (void)
         SysCtlDelay (SysCtlClockGet () / 6);
         slow_timer ++;
     }
-    g_state = g_prev_state;
+
 }
 
 //*****************************************************************************
@@ -111,64 +112,103 @@ displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine)
     OLEDStringDraw (text_buffer, 0, charLine);
 }
 
-void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance)
+
+
+void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance)
 {
 
-    if (state == 0) {
+    uint32_t defaultGoal = 10000;
+
+    /*if (g_state == 0) {
         OLEDStringDraw ("                ", 0, 0);
         OLEDStringDraw ("Accl raw", 0, 0);
         //Display units = raw
         displayUpdate ("Accl", "X", acceleration_mean.x, 1);
         displayUpdate ("Accl", "Y", acceleration_mean.y, 2);
         displayUpdate ("Accl", "Z", acceleration_mean.z, 3);
-    } else if (state == 1) {
+    } else if (g_state == 1) {
         OLEDStringDraw ("                ", 0, 0);
         OLEDStringDraw ("Accl g", 0, 0);
         //Display units = g
         displayUpdate ("Accl", "X", acceleration_mean.x / NUM_BITS, 1);
         displayUpdate ("Accl", "Y", acceleration_mean.y / NUM_BITS, 2); //Changing the mean data stored as the raw data units to g
         displayUpdate ("Accl", "Z", acceleration_mean.z / NUM_BITS, 3); //by dividing each axis' value by the number of bits.
-    } else if (state == 2) {
+    } else if (g_state == 2) {
         OLEDStringDraw ("                ", 0, 0);
         OLEDStringDraw ("Accl ms^-2", 0, 0);
         //Display units = ms^-2
         displayUpdate ("Accl", "X", (acceleration_mean.x * GRAVITY) / NUM_BITS, 1); //Changing the mean data stored as raw data units to
         displayUpdate ("Accl", "Y", (acceleration_mean.y * GRAVITY) / NUM_BITS, 2); //ms^-2 by multiplying by gravity before dividing by the
         displayUpdate ("Accl", "Z", (acceleration_mean.z * GRAVITY) / NUM_BITS, 3); //number of bits.
-    } else if (state == 3) {
+    } else if (g_state == 3) {
         OLEDStringDraw ("                ", 0, 0);
         OLEDStringDraw ("Ref Ori", 0, 0);
         displayUpdate ("Pitch", "Y", relative_pitch, 1);
         displayUpdate ("Roll", "X", relative_roll, 2);
         OLEDStringDraw ("                ", 0, 3);
-        refDelay();
-    } else if (state == 4)  {
+        refDelay();*/
+
+    if (g_state == 4)  {
         OLEDStringDraw ("   Steps since  ", 0, 0);
         OLEDStringDraw ("   last time    ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
-        displayUpdate ("Steps", "=", stepsSinceReset, 3);
-    } else if (state == 5) {
+        displayUpdate ("", "", stepsSinceReset, 3);
+        OLEDStringDraw ("Steps", 8, 3);
+    } else if (g_state == 5) {
         OLEDStringDraw (" distance since ", 0, 0);
         OLEDStringDraw ("   last time    ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
-        displayUpdate ("dist", "=", distanceSinceReset, 3);
-        OLEDStringDraw ("km", 10, 3);
-    } else if (state == 6) {
+        displayUpdate ("", "", distanceSinceReset, 3);
+        OLEDStringDraw ("meters", 10, 3);
+    } else if (g_state == 6) {
         OLEDStringDraw (" Set goal TODO ", 0, 0);
         OLEDStringDraw ("                ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
         OLEDStringDraw ("                ", 0, 3);
-    } else if (state == 7)  {
+    } else if (g_state == 7)  {
+        //Total distance
+        OLEDStringDraw ("                ", 0, 3);
+        if (g_units == 0) {
+            //Display distance in Km
+            uint16_t totalDistanceKm = totalDistance / 1000;
+            uint16_t remainder = totalDistance % 1000;
+            char text_buffer[17];
+            usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceKm, remainder);
+            OLEDStringDraw (text_buffer, 5, 3);
+            OLEDStringDraw ("Km", 10, 3);
+        } else if (g_units == 1) {
+            //Display distance in miles (ew)
+            uint16_t totalDistanceMiles = totalDistance / 1609;
+            uint16_t remainder = ((totalDistance*1000) / 1609) % 1000;
+            char text_buffer[17];
+            usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceMiles, remainder);
+            OLEDStringDraw (text_buffer, 3, 3);
+            OLEDStringDraw ("miles", 9, 3);
+        }
         OLEDStringDraw (" total distance ", 0, 0);
-       OLEDStringDraw ("   in km        ", 0, 1);
+       OLEDStringDraw ("                ", 0, 1);
        OLEDStringDraw ("                ", 0, 2);
-       displayUpdate ("dist", "=", totalDistance, 3);
-       OLEDStringDraw ("m", 10, 3);
-    } else if (state == 8) {
+
+    } else if (g_state == 8) {
+        //Total steps
+        if (g_units == 0) {
+            //Display as a percentage
+            uint16_t percentageOfGoal = ((totalSteps * 100 )/ defaultGoal);
+            if (percentageOfGoal >= 100) {
+                percentageOfGoal = 100;
+            }
+            displayUpdate ("Percent", "=", percentageOfGoal, 3);
+            OLEDStringDraw ("%", 15, 3);
+
+        } else if (g_units == 1) {
+            displayUpdate ("", "", totalSteps, 3);
+            OLEDStringDraw ("Steps", 8, 3);
+        }
+
         OLEDStringDraw ("   Total steps  ", 0, 0);
         OLEDStringDraw ("                ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
-        displayUpdate ("Steps", "=", totalSteps, 3);
+
     }
 }
 

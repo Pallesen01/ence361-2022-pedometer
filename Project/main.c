@@ -34,7 +34,7 @@
 #include "readRollPitch.h"
 
 uint32_t g_state;
-uint32_t g_prev_state;
+uint32_t g_units;
 
 /********************************************************
  * main
@@ -73,8 +73,9 @@ main (void)
     int8_t roll = setReferenceRoll(acceleration_raw);
 
     g_state = 4;
+    g_units = 0;
 
-    displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
+    displayAcc(acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
 
 
     while (1)

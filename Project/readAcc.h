@@ -16,9 +16,13 @@
 #define READACC_H_
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "circBufT.h"
+
+extern uint32_t g_state;
+extern uint32_t g_units;
 
 /**********************************************************
  * Constants
@@ -50,6 +54,6 @@ vector3_t getAcclData (void);
 
 int32_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
 
-void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance);
+void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance);
 
 #endif /* READACC_H_ */

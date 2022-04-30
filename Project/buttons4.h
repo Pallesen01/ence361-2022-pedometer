@@ -18,7 +18,7 @@
 #include <stdbool.h>
 
 extern uint32_t g_state;
-extern uint32_t g_prev_state;
+extern uint32_t g_units;
 
 //*****************************************************************************
 // Constants
