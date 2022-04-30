@@ -152,7 +152,7 @@ void upButtonIntHandler (void)
     }
 
     vector3_t accData = getAcclData();
-    displayAcc(g_state, accData,0,0,0,0);
+    displayAcc(g_state, accData,0,0,0,0,0,0);
     //display accel
     GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
 }
@@ -166,19 +166,120 @@ void downButtonIntHandler (void)
     vector3_t accData = getAcclData();
     int8_t pitch = setReferencePitch(accData);
     int8_t roll = setReferenceRoll(accData);
-    displayAcc(g_state, accData, pitch, roll,0,0);
+    displayAcc(g_state, accData, pitch, roll,0,0,0,0);
 
     GPIOIntClear(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
 }
 
 void leftButtonIntHandler (void)
 {
-    g_state += 1;
-    if (g_state > 6)
-    {
+    GPIOIntDisable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+    uint32_t startUpSteps = 1234;
+    uint32_t startUpDistance = 1000;
+    vector3_t accData = getAcclData();
+
+    if (g_state == 4) {
+        g_state = 5;
+    } else if (g_state == 5) {
+        g_state = 6;
+    } else if (g_state == 6) {
         g_state = 4;
+    } else if (g_state == 7) {
+        g_state = 6;
+    } else if (g_state == 8) {
+        g_state = 5;
     }
+
+    displayAcc(g_state, accData, 0, 0,startUpSteps,startUpDistance,0,0);
+
+    SysCtlDelay (SysCtlClockGet () / 15);
     GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+    GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+    GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+}
+
+void rightButtonIntHandler (void)
+{
+    GPIOIntDisable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+    uint32_t totalSteps = 5789;
+    uint32_t totalDistance = 3200;
+
+    vector3_t accData = getAcclData();
+
+    if (g_state == 4) {
+        g_state = 6;
+    } else if (g_state == 5) {
+        g_state = 8;
+    } else if (g_state == 6) {
+        g_state = 7;
+    } else if (g_state == 7) {
+        g_state = 8;
+    } else if (g_state == 8) {
+        g_state = 6;
+    }
+
+    displayAcc(g_state, accData, 0, 0,0,0,totalSteps,totalDistance);
+
+    SysCtlDelay (SysCtlClockGet () / 15);
+    GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+    GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+    GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+
+
+}
+
+void (sidewaysButtonHandler) (void)
+{
+    if (GPIOPinRead(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN)) {
+        GPIOIntDisable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+        uint32_t totalSteps = 5789;
+        uint32_t totalDistance = 3200;
+
+        vector3_t accData = getAcclData();
+
+        if (g_state == 4) {
+            g_state = 6;
+        } else if (g_state == 5) {
+            g_state = 8;
+        } else if (g_state == 6) {
+            g_state = 7;
+        } else if (g_state == 7) {
+            g_state = 8;
+        } else if (g_state == 8) {
+            g_state = 6;
+        }
+
+        displayAcc(g_state, accData, 0, 0,0,0,totalSteps,totalDistance);
+
+        SysCtlDelay (SysCtlClockGet () / 15);
+        GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+        GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+        GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+    } else if (GPIOPinRead(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN)) {
+        GPIOIntDisable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+        uint32_t startUpSteps = 1234;
+        uint32_t startUpDistance = 1000;
+        vector3_t accData = getAcclData();
+
+        if (g_state == 4) {
+            g_state = 5;
+        } else if (g_state == 5) {
+            g_state = 6;
+        } else if (g_state == 6) {
+            g_state = 4;
+        } else if (g_state == 7) {
+            g_state = 6;
+        } else if (g_state == 8) {
+            g_state = 5;
+        }
+
+        displayAcc(g_state, accData, 0, 0,startUpSteps,startUpDistance,0,0);
+
+        SysCtlDelay (SysCtlClockGet () / 15);
+        GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+        GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+        GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
+    }
 }
 
 void initButtInt (void)
@@ -189,6 +290,12 @@ void initButtInt (void)
     GPIOIntRegister(DOWN_BUT_PORT_BASE, downButtonIntHandler);
     GPIOIntEnable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
 
-    GPIOIntRegister(LEFT_BUT_PORT_BASE, leftButtonIntHandler);
+    GPIOIntRegister(RIGHT_BUT_PORT_BASE, sidewaysButtonHandler);
+    GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
     GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
+
+    /*GPIOIntRegister(LEFT_BUT_PORT_BASE, leftButtonIntHandler);
+    GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);*/
+
+
 }

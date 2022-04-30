@@ -42,8 +42,8 @@ uint32_t g_prev_state;
 int
 main (void)
       {
-    vector3_t acceleration_raw;
-    vector3_t acceleration_mean;
+    vector3_t acceleration_raw = {0,0,0};
+    vector3_t acceleration_mean = {0,0,0};
 
     int32_t sum;
     uint16_t i;
@@ -63,13 +63,18 @@ main (void)
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
     uint32_t startUpSteps = 1234;
-    uint8_t startUpKM = 1;
+    uint32_t totalSteps = 5789;
+    uint32_t startUpDistance = 1000;
+    uint32_t totalDistance = 3200;
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
     int8_t pitch = setReferencePitch(acceleration_raw);
     int8_t roll = setReferenceRoll(acceleration_raw);
+
     g_state = 4;
+
+    displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
 
 
     while (1)
@@ -88,6 +93,6 @@ main (void)
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
-        displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpKM);
+        //displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
     }
 }

@@ -77,5 +77,7 @@ checkButton (uint8_t butName);
 void initButtInt (void);
 void upButtonIntHandler (void);
 void downButtonIntHandler (void);
+void leftButtonHandler (void);
+void rightButtonHandler (void);
 
 #endif /*BUTTONS_H_*/

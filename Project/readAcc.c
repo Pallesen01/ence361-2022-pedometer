@@ -111,7 +111,7 @@ displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine)
     OLEDStringDraw (text_buffer, 0, charLine);
 }
 
-void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint8_t distanceSinceReset)
+void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance)
 {
 
     if (state == 0) {
@@ -158,6 +158,17 @@ void displayAcc (uint32_t state, vector3_t acceleration_mean, int8_t relative_pi
         OLEDStringDraw ("                ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
         OLEDStringDraw ("                ", 0, 3);
+    } else if (state == 7)  {
+        OLEDStringDraw (" total distance ", 0, 0);
+       OLEDStringDraw ("   in km        ", 0, 1);
+       OLEDStringDraw ("                ", 0, 2);
+       displayUpdate ("dist", "=", totalDistance, 3);
+       OLEDStringDraw ("m", 10, 3);
+    } else if (state == 8) {
+        OLEDStringDraw ("   Total steps  ", 0, 0);
+        OLEDStringDraw ("                ", 0, 1);
+        OLEDStringDraw ("                ", 0, 2);
+        displayUpdate ("Steps", "=", totalSteps, 3);
     }
 }
 
