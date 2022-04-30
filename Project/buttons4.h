@@ -25,6 +25,9 @@ extern uint32_t g_units;
 //*****************************************************************************
 enum butNames {UP = 0, DOWN, LEFT, RIGHT, NUM_BUTS};
 enum butStates {RELEASED = 0, PUSHED, NO_CHANGE};
+
+enum swNames {SW_LEFT = 0, SW_RIGHT, NUM_SW};
+enum swStates {SW_DOWN = 0, SW_UP};
 // UP button
 #define UP_BUT_PERIPH  SYSCTL_PERIPH_GPIOE
 #define UP_BUT_PORT_BASE  GPIO_PORTE_BASE
@@ -46,7 +49,32 @@ enum butStates {RELEASED = 0, PUSHED, NO_CHANGE};
 #define RIGHT_BUT_PIN  GPIO_PIN_0
 #define RIGHT_BUT_NORMAL  true
 
+//Switch 1
+
+#define SW1_PERIPH SYSCTL_PERIPH_GPIOA
+#define SW1_PORT_BASE GPIO_PORTA_BASE
+#define SW1_PIN GPIO_PIN_7
+#define SW1_NORMAL false
+
+//Switch 2
+
+#define SW2_PERIPH SYSCTL_PERIPH_GPIOA
+#define SW2_PORT_BASE GPIO_PORTA_BASE
+#define SW2_PIN GPIO_PIN_6
+#define SW2_NORMAL false
+
 #define NUM_BUT_POLLS 3
+#define NUM_SW_POLLS 1
+
+void
+initSwitches (void);
+
+void
+updateSwitches (void);
+
+uint8_t
+checkSwitch (uint8_t swName);
+
 // Debounce algorithm: A state machine is associated with each button.
 // A state change occurs only after NUM_BUT_POLLS consecutive polls have
 // read the pin in the opposite condition, before the state changes and

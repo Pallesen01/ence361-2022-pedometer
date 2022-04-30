@@ -28,9 +28,6 @@
 #include "acc.h"
 #include "readRollPitch.h"
 
-
-
-
 // *******************************************************
 // Globals to module
 // *******************************************************
@@ -38,6 +35,10 @@ static bool but_state[NUM_BUTS];	// Corresponds to the electrical state
 static uint8_t but_count[NUM_BUTS];
 static bool but_flag[NUM_BUTS];
 static bool but_normal[NUM_BUTS];   // Corresponds to the electrical state
+
+static bool sw_state[NUM_SW];
+static uint8_t sw_count[NUM_SW];
+static bool sw_normal[NUM_SW];
 
 // *******************************************************
 // initButtons: Initialise the variables associated with the set of buttons
@@ -85,6 +86,65 @@ initButtons (void)
 		but_count[i] = 0;
 		but_flag[i] = false;
 	}
+}
+
+void
+initSwitches (void)
+{
+    int i;
+    SysCtlPeripheralEnable (SW1_PERIPH);
+    GPIOPinTypeGPIOInput (SW1_PORT_BASE, SW1_PIN);
+    GPIOPadConfigSet (SW1_PORT_BASE, SW1_PIN, GPIO_STRENGTH_2MA,
+       GPIO_PIN_TYPE_STD_WPU);
+    sw_normal[SW_RIGHT] = SW1_NORMAL;
+
+    SysCtlPeripheralEnable (SW2_PERIPH);
+    GPIOPinTypeGPIOInput (SW2_PORT_BASE, SW2_PIN);
+    GPIOPadConfigSet (SW2_PORT_BASE, SW2_PIN, GPIO_STRENGTH_2MA,
+       GPIO_PIN_TYPE_STD_WPU);
+    sw_normal[SW_LEFT] = SW2_NORMAL;
+
+    for (i = 0; i < NUM_SW; i++) {
+        sw_state[i] = sw_normal[i];
+        sw_count[i] = 0;
+    }
+}
+
+void
+updateSwitches (void)
+{
+    bool sw_value[NUM_SW];
+    int i;
+
+    sw_value[SW_LEFT] = (GPIOPinRead (SW2_PORT_BASE, SW2_PIN) == SW2_PIN);
+    sw_value[SW_RIGHT] = (GPIOPinRead (SW1_PORT_BASE, SW1_PIN) == SW1_PIN);
+
+    // Iterate through the buttons, updating button variables as required
+    for (i = 0; i < NUM_SW; i++)
+    {
+        if (sw_value[i] != sw_state[i])
+        {
+            sw_count[i]++;
+            if (sw_count[i] >= NUM_SW_POLLS)
+            {
+                sw_state[i] = sw_value[i];
+                but_count[i] = 0;
+            }
+        }
+        else
+            sw_count[i] = 0;
+    }
+
+}
+
+uint8_t
+checkSwitch (uint8_t swName)
+{
+    if (sw_state[swName] == sw_normal[swName]) {
+        return SW_DOWN;
+    } else {
+        return SW_UP;
+    }
 }
 
 // *******************************************************

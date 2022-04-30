@@ -52,9 +52,11 @@ main (void)
     static circBuf_t y_circ_buff;
     static circBuf_t z_circ_buff;
 
+
     initClock ();
     initAccl ();
     initDisplay ();
+    initSwitches(); //Breaks code
     initButtons ();
     initButtInt ();
 
@@ -95,5 +97,20 @@ main (void)
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
         //displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
+
+        /*if (checkSwitch(SW_LEFT) == SW_UP) {
+            //TODO Testing mode
+            OLEDStringDraw ("              ", 0, 0);
+            OLEDStringDraw ("  Test mode  ", 0, 0);
+            OLEDStringDraw ("             ", 0, 1);
+            OLEDStringDraw ("            ", 0, 2);
+            OLEDStringDraw ("           ", 0, 3);
+        } else {
+            OLEDStringDraw ("              ", 0, 0);
+            OLEDStringDraw ("      off      ", 0, 0);
+            OLEDStringDraw ("                ", 0, 1);
+            OLEDStringDraw ("                ", 0, 2);
+            OLEDStringDraw ("                ", 0, 3);
+        }*/
     }
 }
