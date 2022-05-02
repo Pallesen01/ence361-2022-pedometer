@@ -107,5 +107,6 @@ void upButtonIntHandler (void);
 void downButtonIntHandler (void);
 void leftButtonHandler (void);
 void rightButtonHandler (void);
+void switchOneIntHandler (void);
 
 #endif /*BUTTONS_H_*/

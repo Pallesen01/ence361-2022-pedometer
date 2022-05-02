@@ -41,7 +41,7 @@ uint32_t g_units;
  ********************************************************/
 int
 main (void)
-      {
+{
     vector3_t acceleration_raw = {0,0,0};
     vector3_t acceleration_mean = {0,0,0};
 
@@ -56,7 +56,7 @@ main (void)
     initClock ();
     initAccl ();
     initDisplay ();
-    initSwitches(); //Breaks code
+    initSwitches();
     initButtons ();
     initButtInt ();
 
@@ -86,6 +86,7 @@ main (void)
         //displayAcc(g_state, acceleration_raw);
         acceleration_raw = getAcclData();
 
+
         // Write acceleration values to circular buffers
         writeCircBuf (&x_circ_buff, acceleration_raw.x);
         writeCircBuf (&y_circ_buff, acceleration_raw.y);
@@ -96,9 +97,9 @@ main (void)
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
-        //displayAcc(g_state, acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
+        updateSwitches();
 
-        /*if (checkSwitch(SW_LEFT) == SW_UP) {
+        /*if (GPIOPinRead(SW1_PORT_BASE, SW1_PIN)) {
             //TODO Testing mode
             OLEDStringDraw ("              ", 0, 0);
             OLEDStringDraw ("  Test mode  ", 0, 0);
@@ -112,5 +113,8 @@ main (void)
             OLEDStringDraw ("                ", 0, 2);
             OLEDStringDraw ("                ", 0, 3);
         }*/
+
+
     }
+
 }

@@ -38,6 +38,7 @@ static bool but_normal[NUM_BUTS];   // Corresponds to the electrical state
 
 static bool sw_state[NUM_SW];
 static uint8_t sw_count[NUM_SW];
+static bool sw_flag[NUM_BUTS];
 static bool sw_normal[NUM_SW];
 
 // *******************************************************
@@ -91,23 +92,22 @@ initButtons (void)
 void
 initSwitches (void)
 {
-    int i;
-    SysCtlPeripheralEnable (SW1_PERIPH);
-    GPIOPinTypeGPIOInput (SW1_PORT_BASE, SW1_PIN);
-    GPIOPadConfigSet (SW1_PORT_BASE, SW1_PIN, GPIO_STRENGTH_2MA,
-       GPIO_PIN_TYPE_STD_WPU);
-    sw_normal[SW_RIGHT] = SW1_NORMAL;
+    //int i;
+    SysCtlPeripheralEnable (SYSCTL_PERIPH_GPIOA);
+    GPIOPinTypeGPIOInput (GPIO_PORTA_BASE, GPIO_PIN_7);
+    GPIOPadConfigSet (GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
+    sw_normal[SW_LEFT] = SW1_NORMAL;
 
-    SysCtlPeripheralEnable (SW2_PERIPH);
-    GPIOPinTypeGPIOInput (SW2_PORT_BASE, SW2_PIN);
-    GPIOPadConfigSet (SW2_PORT_BASE, SW2_PIN, GPIO_STRENGTH_2MA,
-       GPIO_PIN_TYPE_STD_WPU);
-    sw_normal[SW_LEFT] = SW2_NORMAL;
+    //SysCtlPeripheralEnable (SW2_PERIPH);
+    GPIOPinTypeGPIOInput (GPIO_PORTA_BASE, GPIO_PIN_6);
+        GPIOPadConfigSet (GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_STRENGTH_2MA,
+           GPIO_PIN_TYPE_STD_WPD);
+    sw_normal[SW_RIGHT] = SW2_NORMAL;
 
-    for (i = 0; i < NUM_SW; i++) {
+    /*for (i = 0; i < NUM_SW; i++) {
         sw_state[i] = sw_normal[i];
         sw_count[i] = 0;
-    }
+    }*/
 }
 
 void
@@ -116,8 +116,9 @@ updateSwitches (void)
     bool sw_value[NUM_SW];
     int i;
 
-    sw_value[SW_LEFT] = (GPIOPinRead (SW2_PORT_BASE, SW2_PIN) == SW2_PIN);
-    sw_value[SW_RIGHT] = (GPIOPinRead (SW1_PORT_BASE, SW1_PIN) == SW1_PIN);
+    sw_value[SW_LEFT] = (GPIOPinRead (SW1_PORT_BASE, SW1_PIN) == SW1_PIN);
+    sw_value[SW_RIGHT] = (GPIOPinRead (SW2_PORT_BASE, SW2_PIN) == SW2_PIN);
+
 
     // Iterate through the buttons, updating button variables as required
     for (i = 0; i < NUM_SW; i++)
@@ -128,11 +129,26 @@ updateSwitches (void)
             if (sw_count[i] >= NUM_SW_POLLS)
             {
                 sw_state[i] = sw_value[i];
-                but_count[i] = 0;
+                sw_flag[i] = true;
+                sw_count[i] = 0;
             }
         }
         else
             sw_count[i] = 0;
+    }
+    if (sw_value[SW_LEFT]) {
+       //Testing switch functionality
+       OLEDStringDraw ("              ", 0, 0);
+       OLEDStringDraw ("  Test mode  ", 0, 0);
+       OLEDStringDraw ("             ", 0, 1);
+       OLEDStringDraw ("            ", 0, 2);
+       OLEDStringDraw ("           ", 0, 3);
+    } else {
+       OLEDStringDraw ("              ", 0, 0);
+       OLEDStringDraw ("      off      ", 0, 0);
+       OLEDStringDraw ("                ", 0, 1);
+       OLEDStringDraw ("                ", 0, 2);
+       OLEDStringDraw ("                ", 0, 3);
     }
 
 }
@@ -289,6 +305,19 @@ void (sidewaysButtonHandler) (void)
     }
 }
 
+/*void
+switchOneIntHandler (void)
+{
+    //TODO Testing mode
+    if (GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_7)) {
+        OLEDStringDraw("FUCK    ",0,0);
+    } else {
+        OLEDStringDraw ("  SHIT  ", 0, 0);
+    }
+    SysCtlDelay(SysCtlClockGet());
+    GPIOIntClear(SW1_PORT_BASE, SW1_PIN);
+}*/
+
 void initButtInt (void)
 {
     GPIOIntRegister(UP_BUT_PORT_BASE, upButtonIntHandler);
@@ -300,6 +329,4 @@ void initButtInt (void)
     GPIOIntRegister(RIGHT_BUT_PORT_BASE, sidewaysButtonHandler);
     GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
     GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-
-
 }
