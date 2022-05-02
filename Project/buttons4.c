@@ -38,7 +38,6 @@ static bool but_normal[NUM_BUTS];   // Corresponds to the electrical state
 
 static bool sw_state[NUM_SW];
 static uint8_t sw_count[NUM_SW];
-static bool sw_flag[NUM_BUTS];
 static bool sw_normal[NUM_SW];
 
 // *******************************************************
@@ -98,16 +97,13 @@ initSwitches (void)
     GPIOPadConfigSet (GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
     sw_normal[SW_LEFT] = SW1_NORMAL;
 
-    //SysCtlPeripheralEnable (SW2_PERIPH);
+
     GPIOPinTypeGPIOInput (GPIO_PORTA_BASE, GPIO_PIN_6);
         GPIOPadConfigSet (GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_STRENGTH_2MA,
            GPIO_PIN_TYPE_STD_WPD);
     sw_normal[SW_RIGHT] = SW2_NORMAL;
 
-    /*for (i = 0; i < NUM_SW; i++) {
-        sw_state[i] = sw_normal[i];
-        sw_count[i] = 0;
-    }*/
+
 }
 
 void
@@ -129,28 +125,20 @@ updateSwitches (void)
             if (sw_count[i] >= NUM_SW_POLLS)
             {
                 sw_state[i] = sw_value[i];
-                sw_flag[i] = true;
+
                 sw_count[i] = 0;
             }
         }
         else
             sw_count[i] = 0;
     }
-    if (sw_value[SW_LEFT]) {
-       //Testing switch functionality
-       OLEDStringDraw ("              ", 0, 0);
-       OLEDStringDraw ("  Test mode  ", 0, 0);
-       OLEDStringDraw ("             ", 0, 1);
-       OLEDStringDraw ("            ", 0, 2);
-       OLEDStringDraw ("           ", 0, 3);
-    } else {
-       OLEDStringDraw ("              ", 0, 0);
-       OLEDStringDraw ("      off      ", 0, 0);
-       OLEDStringDraw ("                ", 0, 1);
-       OLEDStringDraw ("                ", 0, 2);
-       OLEDStringDraw ("                ", 0, 3);
-    }
 
+    if (sw_value[SW_RIGHT]) {
+        //Switch has been flicked
+        g_testState = 1;
+    } else {
+        g_testState = 0;
+    }
 }
 
 uint8_t
@@ -221,19 +209,25 @@ checkButton (uint8_t butName)
 
 void upButtonIntHandler (void)
 {
-    uint32_t totalSteps = 5789;
-    uint32_t totalDistance = 3200;
-    uint32_t startUpSteps = 1234;
-    uint32_t startUpDistance = 1000;
-    //change units
-    g_units += 1;
-    if (g_units > 1) {
-        g_units = 0;
+    GPIOIntDisable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
+    if (g_testState == 0) {
+        //Switch is off
+        //change units
+        g_units += 1;
+        if (g_units > 1) {
+            g_units = 0;
+        }
+    } else if (g_testState == 1) {
+        //Switch is on
+        //Incriment steps and distance
+        g_totalSteps += 100;
+        g_totalDistance += 90;
     }
 
-    vector3_t accData = getAcclData();
-    displayAcc(accData,0,0,startUpSteps,startUpDistance,totalSteps,totalDistance);
-    //display accel
+    vector3_t accData = {0,0,0};
+    updateDisplay(accData,0,0);
+
+    GPIOIntEnable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
     GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
 }
 
@@ -242,12 +236,27 @@ void downButtonIntHandler (void)
     GPIOIntDisable(UP_BUT_PORT_BASE, UP_BUT_PIN);
     //display acc
 
-    g_state = 3;
-    vector3_t accData = getAcclData();
-    int8_t pitch = setReferencePitch(accData);
-    int8_t roll = setReferenceRoll(accData);
-    displayAcc(accData, pitch, roll,0,0,0,0);
+    if (g_testState == 0) {
+        //TODO Set goal state
+    } else if (g_testState == 1) {
+        //Test mode is active
 
+        if (g_totalSteps < 500) {
+            g_totalSteps = 0;
+        } else {
+            g_totalSteps -= 500;
+        }
+
+        if (g_totalDistance < 450) {
+            g_totalDistance = 0;
+        } else {
+            g_totalDistance -= 450;
+        }
+    }
+    vector3_t accData = getAcclData();
+    updateDisplay(accData, 0,0);
+
+    GPIOIntEnable(UP_BUT_PORT_BASE, UP_BUT_PIN);
     GPIOIntClear(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
 }
 
@@ -255,8 +264,6 @@ void (sidewaysButtonHandler) (void)
 {
     if (GPIOPinRead(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN)) {
         GPIOIntDisable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
-        uint32_t totalSteps = 5789;
-        uint32_t totalDistance = 3200;
 
         vector3_t accData = getAcclData();
 
@@ -272,7 +279,7 @@ void (sidewaysButtonHandler) (void)
             g_state = 6;
         }
 
-        displayAcc(accData, 0, 0,0,0,totalSteps,totalDistance);
+        updateDisplay(accData, 0, 0);
 
         SysCtlDelay (SysCtlClockGet () / 15);
         GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
@@ -280,8 +287,7 @@ void (sidewaysButtonHandler) (void)
         GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
     } else if (GPIOPinRead(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN)) {
         GPIOIntDisable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
-        uint32_t startUpSteps = 1234;
-        uint32_t startUpDistance = 1000;
+
         vector3_t accData = getAcclData();
 
         if (g_state == 4) {
@@ -296,7 +302,7 @@ void (sidewaysButtonHandler) (void)
             g_state = 5;
         }
 
-        displayAcc(accData, 0, 0,startUpSteps,startUpDistance,0,0);
+        updateDisplay(accData, 0, 0);
 
         SysCtlDelay (SysCtlClockGet () / 15);
         GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
@@ -304,19 +310,6 @@ void (sidewaysButtonHandler) (void)
         GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
     }
 }
-
-/*void
-switchOneIntHandler (void)
-{
-    //TODO Testing mode
-    if (GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_7)) {
-        OLEDStringDraw("FUCK    ",0,0);
-    } else {
-        OLEDStringDraw ("  SHIT  ", 0, 0);
-    }
-    SysCtlDelay(SysCtlClockGet());
-    GPIOIntClear(SW1_PORT_BASE, SW1_PIN);
-}*/
 
 void initButtInt (void)
 {

@@ -35,6 +35,12 @@
 
 uint32_t g_state;
 uint32_t g_units;
+uint32_t g_testState;
+
+uint32_t g_totalDistance;
+uint32_t g_totalSteps;
+uint32_t g_startUpSteps;
+uint32_t g_startUpDistance;
 
 /********************************************************
  * main
@@ -64,10 +70,10 @@ main (void)
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    uint32_t startUpSteps = 1234;
-    uint32_t totalSteps = 5789;
-    uint32_t startUpDistance = 1000;
-    uint32_t totalDistance = 3200;
+    g_startUpSteps = 1234;
+    g_totalSteps = 5789;
+    g_startUpDistance = 1000;
+    g_totalDistance = 3200;
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
@@ -76,8 +82,12 @@ main (void)
 
     g_state = 4;
     g_units = 0;
+    g_testState = 0;
 
-    displayAcc(acceleration_mean, 0, 0, startUpSteps, startUpDistance, totalSteps, totalDistance);
+    updateSwitches();
+
+    updateDisplay(acceleration_mean, 0, 0);
+
 
 
     while (1)
@@ -98,21 +108,7 @@ main (void)
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
         updateSwitches();
-
-        /*if (GPIOPinRead(SW1_PORT_BASE, SW1_PIN)) {
-            //TODO Testing mode
-            OLEDStringDraw ("              ", 0, 0);
-            OLEDStringDraw ("  Test mode  ", 0, 0);
-            OLEDStringDraw ("             ", 0, 1);
-            OLEDStringDraw ("            ", 0, 2);
-            OLEDStringDraw ("           ", 0, 3);
-        } else {
-            OLEDStringDraw ("              ", 0, 0);
-            OLEDStringDraw ("      off      ", 0, 0);
-            OLEDStringDraw ("                ", 0, 1);
-            OLEDStringDraw ("                ", 0, 2);
-            OLEDStringDraw ("                ", 0, 3);
-        }*/
+        //updateDisplay(acceleration_mean, 0, 0);
 
 
     }

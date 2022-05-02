@@ -22,7 +22,13 @@
 #include "circBufT.h"
 
 extern uint32_t g_state;
+extern uint32_t g_testState;
 extern uint32_t g_units;
+
+extern uint32_t g_totalDistance;
+extern uint32_t g_totalSteps;
+extern uint32_t g_startUpSteps;
+extern uint32_t g_startUpDistance;
 
 /**********************************************************
  * Constants
@@ -54,6 +60,6 @@ vector3_t getAcclData (void);
 
 int32_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
 
-void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance);
+void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll);
 
 #endif /* READACC_H_ */

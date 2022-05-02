@@ -114,7 +114,7 @@ displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine)
 
 
 
-void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll, uint32_t stepsSinceReset, uint32_t distanceSinceReset, uint32_t totalSteps, uint32_t totalDistance)
+void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll)
 {
 
     uint32_t defaultGoal = 10000;
@@ -152,13 +152,13 @@ void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t rela
         OLEDStringDraw ("   Steps since  ", 0, 0);
         OLEDStringDraw ("   last time    ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
-        displayUpdate ("", "", stepsSinceReset, 3);
+        displayUpdate ("", "", g_startUpSteps, 3);
         OLEDStringDraw ("Steps", 8, 3);
     } else if (g_state == 5) {
         OLEDStringDraw (" distance since ", 0, 0);
         OLEDStringDraw ("   last time    ", 0, 1);
         OLEDStringDraw ("                ", 0, 2);
-        displayUpdate ("", "", distanceSinceReset, 3);
+        displayUpdate ("", "", g_startUpDistance, 3);
         OLEDStringDraw ("meters", 10, 3);
     } else if (g_state == 6) {
         OLEDStringDraw (" Set goal TODO ", 0, 0);
@@ -170,16 +170,16 @@ void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t rela
         OLEDStringDraw ("                ", 0, 3);
         if (g_units == 0) {
             //Display distance in Km
-            uint16_t totalDistanceKm = totalDistance / 1000;
-            uint16_t remainder = totalDistance % 1000;
+            uint16_t totalDistanceKm = g_totalDistance / 1000;
+            uint16_t remainder = g_totalDistance % 1000;
             char text_buffer[17];
             usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceKm, remainder);
             OLEDStringDraw (text_buffer, 5, 3);
-            OLEDStringDraw ("Km", 10, 3);
+            OLEDStringDraw ("Km", 12, 3);
         } else if (g_units == 1) {
             //Display distance in miles (ew)
-            uint16_t totalDistanceMiles = totalDistance / 1609;
-            uint16_t remainder = ((totalDistance*1000) / 1609) % 1000;
+            uint16_t totalDistanceMiles = g_totalDistance / 1609;
+            uint16_t remainder = ((g_totalDistance*1000) / 1609) % 1000;
             char text_buffer[17];
             usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceMiles, remainder);
             OLEDStringDraw (text_buffer, 3, 3);
@@ -193,7 +193,7 @@ void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t rela
         //Total steps
         if (g_units == 0) {
             //Display as a percentage
-            uint16_t percentageOfGoal = ((totalSteps * 100 )/ defaultGoal);
+            uint16_t percentageOfGoal = ((g_totalSteps * 100 )/ defaultGoal);
             if (percentageOfGoal >= 100) {
                 percentageOfGoal = 100;
             }
@@ -201,7 +201,7 @@ void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t rela
             OLEDStringDraw ("%", 15, 3);
 
         } else if (g_units == 1) {
-            displayUpdate ("", "", totalSteps, 3);
+            displayUpdate ("", "", g_totalSteps, 3);
             OLEDStringDraw ("Steps", 8, 3);
         }
 
@@ -210,8 +210,8 @@ void displayAcc (vector3_t acceleration_mean, int8_t relative_pitch, int8_t rela
         OLEDStringDraw ("                ", 0, 2);
 
     }
-}
 
+}
 
 
 /*********************************************************
