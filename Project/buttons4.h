@@ -24,6 +24,7 @@ extern uint32_t g_testState;
 extern uint32_t g_stepGoal;
 extern uint32_t g_displayedStepGoal;
 extern uint32_t g_potiVal;
+extern circBuf_t g_poti_circ_buff;
 
 extern uint32_t g_totalDistance;
 extern uint32_t g_totalSteps;

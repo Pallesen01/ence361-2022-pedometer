@@ -61,7 +61,7 @@ readCircBuf (circBuf_t *buffer)
 
 // *******************************************************
 // freeCircBuf: Releases the memory allocated to the buffer data,
-// sets pointer to NULL and ohter fields to 0. The buffer can
+// sets pointer to NULL and other fields to 0. The buffer can
 // re-initialised by another call to initCircBuf().
 void
 freeCircBuf (circBuf_t * buffer)

@@ -32,6 +32,7 @@
 #include "i2c_driver.h"
 #include "buttons4.h"
 #include "circBufT.h"
+#include <math.h>
 
 typedef struct vector{
     int16_t x;
@@ -64,18 +65,18 @@ vector3_t getAcclData (void);
  ***********************************************************
  * Clock
  ***********************************************************/
-void
+/*void
 initClock (void)
 {
     // Set the clock rate to 20 MHz
     SysCtlClockSet (SYSCTL_SYSDIV_10 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
                    SYSCTL_XTAL_16MHZ);
 }
-
+*/
 /*********************************************************
  * initDisplay
  *********************************************************/
-void
+/*void
 initDisplay (void)
 {
     // Initialise the Orbit OLED display
@@ -93,7 +94,7 @@ refDelay (void)
     }
 
 }
-
+*/
 //*****************************************************************************
 // Function to display a changing message on the display.
 // The display has 4 rows of 16 characters, with 0, 0 at top left.
@@ -133,7 +134,7 @@ void delay_hz (uint32_t hz_delay)
  */
 int32_t goalDisplayVal ()
 {
-    int32_t returnVal = 100 * (g_potiVal) + 10000;
+    int32_t returnVal = 100 * round(g_potiVal/20.425);
     if (returnVal < 0) {
         returnVal = 0;
     }
@@ -188,9 +189,10 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
         displayUpdate ("", "", g_startUpDistance, 3);
         OLEDStringDraw ("meters", 10, 3);
     } else if (g_state == 6) {
-        OLEDStringDraw (" Set goal TODO ", 0, 0);
+        OLEDStringDraw ("    Set goal    ", 0, 0);
         OLEDStringDraw ("                ", 0, 1);
         displayUpdate ("","", goalDisplayVal(), 2);
+        OLEDStringDraw ("Steps", 8, 2);
         OLEDStringDraw ("                ", 0, 3);
     } else if (g_state == 7)  {
         //Total distance
@@ -212,7 +214,7 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
             OLEDStringDraw (text_buffer, 3, 3);
             OLEDStringDraw ("miles", 9, 3);
         }
-        OLEDStringDraw (" total distance ", 0, 0);
+        OLEDStringDraw ("Total distance  ", 0, 0);
        OLEDStringDraw ("                ", 0, 1);
        OLEDStringDraw ("                ", 0, 2);
 
@@ -231,7 +233,7 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
                 percentageOfGoal = 100;
             }
             displayUpdate ("Percent", "=", percentageOfGoal, 3);
-            OLEDStringDraw ("%", 15, 3);
+            OLEDStringDraw ("% ", 14, 3);
 
         } else if (g_units == 1) {
             displayUpdate ("", "", g_totalSteps, 3);

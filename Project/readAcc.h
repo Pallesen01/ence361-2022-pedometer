@@ -48,9 +48,9 @@ typedef struct vector{
 
 void refDelay (void);
 
-void initClock (void);
+/*void initClock (void);
 
-void initDisplay (void);
+void initDisplay (void);*/
 
 void delay_ms (uint32_t ms_delay);
 

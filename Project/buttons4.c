@@ -27,6 +27,7 @@
 #include "readAcc.h"
 #include "acc.h"
 #include "readRollPitch.h"
+#include "../OrbitOLED/OrbitOLEDInterface.h"
 
 // *******************************************************
 // Globals to module
@@ -241,9 +242,10 @@ void downButtonIntHandler (void)
     GPIOIntDisable(UP_BUT_PORT_BASE, UP_BUT_PIN);
     //display acc
 
-    if (g_testState == 0) {
-        //TODO Set goal state
+    if (g_testState == 0 && g_state == 6) {
         g_stepGoal = g_displayedStepGoal;
+        OLEDStringDraw ("    Step goal   ", 0, 2);
+        OLEDStringDraw ("     updated    ", 0, 3);
 
     } else if (g_testState == 1) {
         //Test mode is active
@@ -259,9 +261,11 @@ void downButtonIntHandler (void)
         } else {
             g_totalDistance -= 450;
         }
+
+        vector3_t accData = getAcclData();
+        updateDisplay(accData, 0,0);
     }
-    vector3_t accData = getAcclData();
-    updateDisplay(accData, 0,0);
+
 
     GPIOIntEnable(UP_BUT_PORT_BASE, UP_BUT_PIN);
     GPIOIntClear(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);

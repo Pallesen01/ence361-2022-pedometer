@@ -33,6 +33,7 @@
 #include "readAcc.h"
 #include "readRollPitch.h"
 #include "driverlib/adc.h"
+#include "adcInterrupts.h"
 
 uint32_t g_state;
 uint32_t g_units;
@@ -40,12 +41,33 @@ uint32_t g_testState;
 uint32_t g_stepGoal;
 uint32_t g_displayedStepGoal;
 uint32_t g_potiVal;
+circBuf_t g_poti_circ_buff;
+uint8_t g_updateGoalScreen;
 
 uint32_t g_totalDistance;
 uint32_t g_totalSteps;
 uint32_t g_startUpSteps;
 uint32_t g_startUpDistance;
 
+/**
+ *Returns true if the two numbers entered are very close
+ */
+int similarValues(uint32_t val1, uint32_t val2) {
+    uint8_t threshold = 2;
+    if (val1 >= val2) {
+        if (val1 - val2 <= threshold) {
+            return 1;
+        } else {
+            return 0;
+        }
+    } else {
+        if (val2 - val1 <= threshold) {
+            return 1;
+        } else {
+            return 0;
+        }
+}
+}
 
 
 /********************************************************
@@ -59,20 +81,24 @@ main (void)
 
     int32_t sum;
     uint16_t i;
-    uint32_t ulValue;
+    uint32_t buttonTimer = 0;
+    uint8_t buttonStatus;
+    uint8_t downButPressed=0;
+    uint32_t prevPotiVal;
 
     static circBuf_t x_circ_buff;
     static circBuf_t y_circ_buff;
     static circBuf_t z_circ_buff;
-    static circBuf_t poti_circ_buff;
 
 
     initClock ();
+    initADC ();
     initAccl ();
     initDisplay ();
     initSwitches();
     initButtons ();
     initButtInt ();
+    initSysTick();
 
     // Enable interrupts to the processor.
     IntMasterEnable();
@@ -81,13 +107,14 @@ main (void)
     initCircBuf (&y_circ_buff, BUFF_SIZE);
     initCircBuf (&z_circ_buff, BUFF_SIZE);
 
-    initCircBuf (&poti_circ_buff, BUFF_SIZE);
+    initCircBuf (&g_poti_circ_buff, BUFF_SIZE);
 
     g_startUpSteps = 1234;
     g_totalSteps = 5789;
     g_startUpDistance = 1000;
     g_totalDistance = 3200;
     g_stepGoal = 10000;
+    uint16_t mainLoopHZ = 120;
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
@@ -104,36 +131,63 @@ main (void)
 
     while (1)
     {
-        delay_ms(8); // ~ 120hz
+        delay_hz(mainLoopHZ); // ~ 120hz
         //displayAcc(g_state, acceleration_raw);
         acceleration_raw = getAcclData();
-
-        ADCSequenceDataGet(ADC0_BASE, 3, &ulValue);
 
         // Write acceleration values to circular buffers
         writeCircBuf (&x_circ_buff, acceleration_raw.x);
         writeCircBuf (&y_circ_buff, acceleration_raw.y);
         writeCircBuf (&z_circ_buff, acceleration_raw.z);
 
-        // Potentiometer circular buffer
-        writeCircBuf (&poti_circ_buff, ulValue);
-
         // Calculate mean acceleration along each axis
         acceleration_mean.x = calcMean(sum, i, &x_circ_buff); //Calculates the mean for each axis using the values stored
         acceleration_mean.y = calcMean(sum, i, &y_circ_buff); //in each circular buffer
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
-        g_potiVal = calcMean(sum, i, &poti_circ_buff);
-        test = g_potiVal;
+        g_potiVal = calcMean(sum, i, &g_poti_circ_buff);
+        // uint32_t testttt = g_potiVal;
 
         updateSwitches();
+        /*updateButtons();
 
-        if (g_state == 6) {
+        buttonStatus = checkButton(DOWN);
+        if (buttonStatus == RELEASED) {
+            downButPressed = 0;
+        }
+
+        if (buttonStatus == PUSHED) {
+                    downButPressed = 1;
+                    uint32_t testttt = 666;
+                }
+
+        if (g_state != 6) {
+            buttonTimer++;
+
+            } else if (buttonStatus == NO_CHANGE && downButPressed) {
+                if (buttonTimer >= (2 * mainLoopHZ)) {
+                    // Update step goal if button pressed for more than 2 seconds
+                    g_startUpSteps = 0;
+                    g_totalSteps = 0;
+                    g_startUpDistance = 0;
+                    g_totalDistance = 0;
+                    updateDisplay(acceleration_mean, 0, 0);
+                    buttonStatus = RELEASED;
+                    downButPressed = 0;
+                }
+            }
+        */
+
+        if (g_state == 6 && !similarValues(prevPotiVal,g_potiVal)) {
             updateDisplay(acceleration_mean, 0, 0);
         }
 
-
+        prevPotiVal = g_potiVal;
 
     }
+
+
+
+
 
 }
