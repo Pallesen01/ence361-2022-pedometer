@@ -158,7 +158,6 @@ main (void)
         if (buttonStatus == PUSHED) {
                     buttonTimer = 0;
                     downButPressed = 1;
-                    uint32_t testttt = 666;
                 }
 
         if (g_state != 6) {
@@ -172,7 +171,8 @@ main (void)
                 g_totalSteps = 0;
                 g_startUpDistance = 0;
                 g_totalDistance = 0;
-                updateDisplay(acceleration_mean, 0, 0);
+                OLEDStringDraw ("  distance and  ", 0, 2);
+                OLEDStringDraw ("   steps reset  ", 0, 3);
                 buttonStatus = RELEASED;
                 downButPressed = 0;
                 }
