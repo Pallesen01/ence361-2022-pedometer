@@ -146,10 +146,9 @@ main (void)
         acceleration_mean.z = calcMean(sum, i, &z_circ_buff);
 
         g_potiVal = calcMean(sum, i, &g_poti_circ_buff);
-        // uint32_t testttt = g_potiVal;
 
         updateSwitches();
-        /*updateButtons();
+        updateButtons();
 
         buttonStatus = checkButton(DOWN);
         if (buttonStatus == RELEASED) {
@@ -157,6 +156,7 @@ main (void)
         }
 
         if (buttonStatus == PUSHED) {
+                    buttonTimer = 0;
                     downButPressed = 1;
                     uint32_t testttt = 666;
                 }
@@ -164,19 +164,21 @@ main (void)
         if (g_state != 6) {
             buttonTimer++;
 
-            } else if (buttonStatus == NO_CHANGE && downButPressed) {
-                if (buttonTimer >= (2 * mainLoopHZ)) {
-                    // Update step goal if button pressed for more than 2 seconds
-                    g_startUpSteps = 0;
-                    g_totalSteps = 0;
-                    g_startUpDistance = 0;
-                    g_totalDistance = 0;
-                    updateDisplay(acceleration_mean, 0, 0);
-                    buttonStatus = RELEASED;
-                    downButPressed = 0;
+          if (g_state != 6 && buttonStatus == NO_CHANGE && downButPressed) {
+              // If down button has been held for 0.6 seconds
+            if (buttonTimer >= (0.6 * mainLoopHZ)) {
+                // Update step goal if button pressed for more than 2 seconds
+                g_startUpSteps = 0;
+                g_totalSteps = 0;
+                g_startUpDistance = 0;
+                g_totalDistance = 0;
+                updateDisplay(acceleration_mean, 0, 0);
+                buttonStatus = RELEASED;
+                downButPressed = 0;
                 }
             }
-        */
+        }
+
 
         if (g_state == 6 && !similarValues(prevPotiVal,g_potiVal)) {
             updateDisplay(acceleration_mean, 0, 0);
@@ -184,10 +186,9 @@ main (void)
 
         prevPotiVal = g_potiVal;
 
+
+
+
     }
-
-
-
-
 
 }
