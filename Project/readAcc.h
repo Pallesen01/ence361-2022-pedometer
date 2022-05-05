@@ -52,6 +52,10 @@ void initClock (void);
 
 void initDisplay (void);
 
+void delay_ms (uint32_t ms_delay);
+
+void delay_hz (uint32_t hz_delay);
+
 void displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine);
 
 void initAccl (void);

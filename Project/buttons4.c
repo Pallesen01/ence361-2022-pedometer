@@ -210,22 +210,27 @@ checkButton (uint8_t butName)
 void upButtonIntHandler (void)
 {
     GPIOIntDisable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
-    if (g_testState == 0) {
+    if (g_testState == 0 && g_state != 6) {
         //Switch is off
+        // Not on step goal screen
         //change units
         g_units += 1;
         if (g_units > 1) {
             g_units = 0;
         }
-    } else if (g_testState == 1) {
+    } else if (g_testState == 1 && g_state != 6) {
         //Switch is on
+        // Not on step goal screen
         //Incriment steps and distance
         g_totalSteps += 100;
         g_totalDistance += 90;
     }
 
-    vector3_t accData = {0,0,0};
-    updateDisplay(accData,0,0);
+    if (g_state != 6) {
+        vector3_t accData = {0,0,0};
+        updateDisplay(accData,0,0);
+    }
+
 
     GPIOIntEnable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
     GPIOIntClear(UP_BUT_PORT_BASE, UP_BUT_PIN);
@@ -238,6 +243,8 @@ void downButtonIntHandler (void)
 
     if (g_testState == 0) {
         //TODO Set goal state
+        g_stepGoal = g_displayedStepGoal;
+
     } else if (g_testState == 1) {
         //Test mode is active
 
@@ -323,3 +330,5 @@ void initButtInt (void)
     GPIOIntEnable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
     GPIOIntEnable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
 }
+
+

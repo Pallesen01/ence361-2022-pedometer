@@ -112,12 +112,39 @@ displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine)
     OLEDStringDraw (text_buffer, 0, charLine);
 }
 
+/**
+ * Delays for specific number of milliseconds
+ */
+void delay_ms (uint32_t ms_delay)
+{
+    SysCtlDelay(ms_delay * (SysCtlClockGet() / 3 / 1000));
+}
 
+/**
+ * Runs display at specific frequency
+ */
+void delay_hz (uint32_t hz_delay)
+{
+    delay_ms(1000/hz_delay);
+}
+
+/**
+ * Calculates value to display for goal value
+ */
+int32_t goalDisplayVal ()
+{
+    int32_t returnVal = 100 * (g_potiVal) + 10000;
+    if (returnVal < 0) {
+        returnVal = 0;
+    }
+    g_displayedStepGoal = returnVal;
+    return returnVal;
+}
 
 void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll)
 {
 
-    uint32_t defaultGoal = 10000;
+    // uint32_t defaultGoal = 10000;
 
     /*if (g_state == 0) {
         OLEDStringDraw ("                ", 0, 0);
@@ -163,7 +190,7 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
     } else if (g_state == 6) {
         OLEDStringDraw (" Set goal TODO ", 0, 0);
         OLEDStringDraw ("                ", 0, 1);
-        OLEDStringDraw ("                ", 0, 2);
+        displayUpdate ("","", goalDisplayVal(), 2);
         OLEDStringDraw ("                ", 0, 3);
     } else if (g_state == 7)  {
         //Total distance
@@ -191,9 +218,15 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
 
     } else if (g_state == 8) {
         //Total steps
+        uint16_t percentageOfGoal;
         if (g_units == 0) {
             //Display as a percentage
-            uint16_t percentageOfGoal = ((g_totalSteps * 100 )/ defaultGoal);
+            if (g_stepGoal != 0) {
+                percentageOfGoal = ((g_totalSteps * 100 )/ g_stepGoal);
+            } else {
+                percentageOfGoal = 100;
+            }
+
             if (percentageOfGoal >= 100) {
                 percentageOfGoal = 100;
             }

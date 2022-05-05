@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <math.h> // for sqrt() and pow() functions
+#include <math.h> // for sqrt() function
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_i2c.h"
@@ -58,8 +58,8 @@ getSign(int32_t x)
 int8_t
 calcPitch(vector3_t acceleration, int8_t relative_pitch)
 {
-    double x_square = pow(acceleration.x, 2);
-    double z_square =  pow(acceleration.z, 2);
+    double x_square = acceleration.x * acceleration.x ;
+    double z_square = acceleration.z * acceleration.z;
 
     return (atan2(acceleration.y, sqrt(x_square + z_square))*RAD_TO_DEG) - relative_pitch;
 
@@ -71,8 +71,8 @@ calcPitch(vector3_t acceleration, int8_t relative_pitch)
 int8_t
 calcRoll(vector3_t acceleration, int8_t relative_roll)
 {
-    double x_square = pow(acceleration.x, 2);
-    double z_square =  pow(acceleration.z, 2);
+    // double x_square = acceleration.x * acceleration.x;
+    // double z_square = acceleration.z * acceleration.z;
 
     return (atan2(-acceleration.x, acceleration.z)*RAD_TO_DEG) - relative_roll;
 

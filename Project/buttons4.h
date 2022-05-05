@@ -16,10 +16,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "circBufT.h"
 
 extern uint32_t g_state;
 extern uint32_t g_units;
 extern uint32_t g_testState;
+extern uint32_t g_stepGoal;
+extern uint32_t g_displayedStepGoal;
+extern uint32_t g_potiVal;
 
 extern uint32_t g_totalDistance;
 extern uint32_t g_totalSteps;
