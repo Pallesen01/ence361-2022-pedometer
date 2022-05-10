@@ -121,7 +121,7 @@ main (void)
     int8_t pitch = setReferencePitch(acceleration_raw);
     int8_t roll = setReferenceRoll(acceleration_raw);
 
-    g_state = 4;
+    g_state = 8;
     g_units = 0;
     g_testState = 0;
 

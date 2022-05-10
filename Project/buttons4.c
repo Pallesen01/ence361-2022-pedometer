@@ -134,7 +134,7 @@ updateSwitches (void)
             sw_count[i] = 0;
     }
 
-    if (sw_value[SW_RIGHT]) {
+    if (sw_value[SW_LEFT]) {
         //Switch has been flicked
         g_testState = 1;
     } else {
@@ -278,7 +278,7 @@ void (sidewaysButtonHandler) (void)
 
         vector3_t accData = getAcclData();
 
-        if (g_state == 4) {
+        /*if (g_state == 4) {
             g_state = 6;
         } else if (g_state == 5) {
             g_state = 8;
@@ -288,6 +288,14 @@ void (sidewaysButtonHandler) (void)
             g_state = 8;
         } else if (g_state == 8) {
             g_state = 6;
+        } */
+
+        if (g_state == 8) {
+            g_state = 7;
+        } else if (g_state == 7) {
+            g_state = 6;
+        } else if (g_state == 6) {
+            g_state = 8;
         }
 
         updateDisplay(accData, 0, 0);
@@ -301,7 +309,7 @@ void (sidewaysButtonHandler) (void)
 
         vector3_t accData = getAcclData();
 
-        if (g_state == 4) {
+        /*if (g_state == 4) {
             g_state = 5;
         } else if (g_state == 5) {
             g_state = 6;
@@ -311,7 +319,16 @@ void (sidewaysButtonHandler) (void)
             g_state = 6;
         } else if (g_state == 8) {
             g_state = 5;
+        }*/
+
+        if (g_state == 8) {
+            g_state = 6;
+        } else if (g_state == 7) {
+            g_state = 8;
+        } else if (g_state == 6) {
+            g_state = 7;
         }
+
 
         updateDisplay(accData, 0, 0);
 

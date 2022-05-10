@@ -202,15 +202,24 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
             uint16_t totalDistanceKm = g_totalDistance / 1000;
             uint16_t remainder = g_totalDistance % 1000;
             char text_buffer[17];
-            usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceKm, remainder);
+            if ((remainder / 100) == 0) {
+                //If there is a 0 in the first decimal place spot
+                usnprintf(text_buffer, sizeof(text_buffer),"%d.%d%d", totalDistanceKm, 0, remainder);
+            } else {
+                usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceKm, remainder);
+            }
             OLEDStringDraw (text_buffer, 5, 3);
             OLEDStringDraw ("Km", 12, 3);
         } else if (g_units == 1) {
-            //Display distance in miles (ew)
+            //Display distance in miles
             uint16_t totalDistanceMiles = g_totalDistance / 1609;
             uint16_t remainder = ((g_totalDistance*1000) / 1609) % 1000;
             char text_buffer[17];
-            usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceMiles, remainder);
+            if ((remainder / 100) == 0) {
+                usnprintf(text_buffer, sizeof(text_buffer),"%d.%d%d", totalDistanceMiles, 0, remainder);
+            } else {
+                usnprintf(text_buffer, sizeof(text_buffer),"%d.%d", totalDistanceMiles, remainder);
+            }
             OLEDStringDraw (text_buffer, 3, 3);
             OLEDStringDraw ("miles", 9, 3);
         }
@@ -221,7 +230,7 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
     } else if (g_state == 8) {
         //Total steps
         uint16_t percentageOfGoal;
-        if (g_units == 0) {
+        if (g_units == 1) {
             //Display as a percentage
             if (g_stepGoal != 0) {
                 percentageOfGoal = ((g_totalSteps * 100 )/ g_stepGoal);
@@ -235,13 +244,13 @@ void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t r
             displayUpdate ("Percent", "=", percentageOfGoal, 3);
             OLEDStringDraw ("% ", 14, 3);
 
-        } else if (g_units == 1) {
+        } else if (g_units == 0) {
             displayUpdate ("", "", g_totalSteps, 3);
             OLEDStringDraw ("Steps", 8, 3);
         }
 
-        OLEDStringDraw ("   Total steps  ", 0, 0);
-        OLEDStringDraw ("                ", 0, 1);
+        OLEDStringDraw ("      Steps     ", 0, 0);
+        displayUpdate ("  Goal", "=", g_stepGoal, 1);
         OLEDStringDraw ("                ", 0, 2);
 
     }
