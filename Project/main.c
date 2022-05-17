@@ -114,12 +114,27 @@ main (void)
     g_startUpDistance = 1000;
     g_totalDistance = 3200;
     g_stepGoal = 10000;
-    uint16_t mainLoopHZ = 120;
+    uint16_t mainLoopHZ = 100;
+
+    // Init variables for step tracking algorithm (Step 0)
+    int32_t th; // threshold for current diff
+    int32_t diff; // (max - accZ(i))
+    int32_t curr_step_freq; // (1/(i-k))
+    int32_t sample_num = 1; // i
+    int32_t prev_step_sample = 0; // k
+    int32_t max; // Max accel since k
+    const int32_t a = 500;
+    const int32_t b = 3.15;
+    g_totalSteps = 0;
+
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
     int8_t pitch = setReferencePitch(acceleration_raw);
     int8_t roll = setReferenceRoll(acceleration_raw);
+
+    // Set first max value for step tracking
+    max = acceleration_raw.z;
 
     g_state = 8;
     g_units = 0;
@@ -131,8 +146,7 @@ main (void)
 
     while (1)
     {
-        delay_hz(mainLoopHZ); // ~ 120hz
-        //displayAcc(g_state, acceleration_raw);
+        delay_hz(mainLoopHZ);
         acceleration_raw = getAcclData();
 
         // Write acceleration values to circular buffers
@@ -150,6 +164,34 @@ main (void)
         updateSwitches();
         updateButtons();
 
+        // Step Tracking Algorithm
+
+        diff = max - acceleration_mean.z;
+        curr_step_freq = (1/(sample_num-prev_step_sample));
+
+        // Step 1
+        th = a/(sample_num - prev_step_sample) + b;
+
+        // Step 2
+        if ((max - acceleration_mean.z) >= th) {
+            // Step 3
+            g_totalSteps = g_totalSteps + 1;
+            // Update display if steps added
+            updateDisplay(acceleration_mean, 0, 0);
+            prev_step_sample = sample_num;
+            // Step 4
+            max = acceleration_mean.z;
+        } else if (acceleration_mean.z > max) {
+            // Step 4
+            max = acceleration_mean.z;
+        }
+
+        sample_num++;
+        g_totalDistance = g_totalSteps * 0.4;
+
+        // Step tracking algorithm ends
+
+        // Buttons for reseting distance and steps
         buttonStatus = checkButton(DOWN);
         if (buttonStatus == RELEASED) {
             downButPressed = 0;

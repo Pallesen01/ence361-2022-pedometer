@@ -358,3 +358,6 @@ calcMean(int32_t sum, uint16_t i, circBuf_t *buffer)
     return (2 * sum + BUFF_SIZE) / 2 / BUFF_SIZE; //Mean calculation avoiding floating numbers.
 
 }
+
+
+
