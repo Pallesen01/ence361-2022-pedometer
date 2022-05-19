@@ -22,7 +22,7 @@
 #include "driverlib/debug.h"
 #include "utils/ustdlib.h"
 #include "circBufT.h"
-#include "OrbitOLED/OrbitOLEDInterface.h"
+#include "../OrbitOLED/OrbitOLEDInterface.h"
 
 #include "driverlib/uart.h"
 #include "utils/ustdlib.h"

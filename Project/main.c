@@ -118,7 +118,7 @@ main (void)
 
     updateSwitches();
 
-    updateDisplay(acceleration_mean, 0, 0);
+    updateDisplay();
 
     while (1)
     {
@@ -152,7 +152,7 @@ main (void)
                 // Step 3
                 g_totalSteps = g_totalSteps + 1;
                 // Update display if steps added
-                updateDisplay(acceleration_mean, 0, 0);
+                updateDisplay();
                 prev_step_sample = sample_num;
                 // Step 4
                 max = acceleration_mean.z;
@@ -199,7 +199,7 @@ main (void)
 
 
         if (g_state == 6 && !similarValues(prevPotiVal,g_potiVal)) {
-            updateDisplay(acceleration_mean, 0, 0);
+            updateDisplay();
         }
 
         prevPotiVal = g_potiVal;
