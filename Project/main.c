@@ -123,8 +123,8 @@ main (void)
     int32_t sample_num = 1; // i
     int32_t prev_step_sample = 0; // k
     int32_t max; // Max accel since k
-    const int32_t a = 500;
-    const int32_t b = 3.15;
+    const int32_t a = 4000;
+    const int32_t b = 3;
     g_totalSteps = 0;
 
 
@@ -169,26 +169,31 @@ main (void)
         diff = max - acceleration_mean.z;
         curr_step_freq = (1/(sample_num-prev_step_sample));
 
-        // Step 1
-        th = a/(sample_num - prev_step_sample) + b;
+        if (abs(acceleration_mean.x) > 150 || abs(acceleration_mean.y) > 150 ) {
 
-        // Step 2
-        if ((max - acceleration_mean.z) >= th) {
-            // Step 3
-            g_totalSteps = g_totalSteps + 1;
-            // Update display if steps added
-            updateDisplay(acceleration_mean, 0, 0);
-            prev_step_sample = sample_num;
-            // Step 4
-            max = acceleration_mean.z;
-        } else if (acceleration_mean.z > max) {
-            // Step 4
-            max = acceleration_mean.z;
+
+
+            // Step 1
+            th = a/(sample_num - prev_step_sample) + b;
+
+            // Step 2
+            if ((max - acceleration_mean.z) >= th) {
+                // Step 3
+                g_totalSteps = g_totalSteps + 1;
+                // Update display if steps added
+                updateDisplay(acceleration_mean, 0, 0);
+                prev_step_sample = sample_num;
+                // Step 4
+                max = acceleration_mean.z;
+            } else if (acceleration_mean.z > max) {
+                // Step 4
+                max = acceleration_mean.z;
+            }
+
+            sample_num++;
+            g_totalDistance = g_totalSteps * 0.4;
+
         }
-
-        sample_num++;
-        g_totalDistance = g_totalSteps * 0.4;
-
         // Step tracking algorithm ends
 
         // Buttons for reseting distance and steps
