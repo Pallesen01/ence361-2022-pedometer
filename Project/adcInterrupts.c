@@ -55,7 +55,6 @@
 //*****************************************************************************
 // Global variables
 //*****************************************************************************
-static circBuf_t g_inBuffer;		// Buffer of size BUF_SIZE integers (sample values)
 static uint32_t g_ulSampCnt;	// Counter for the interrupts
 volatile uint8_t slowTick = false;
 char statusStr[MAX_STR_LEN + 1];

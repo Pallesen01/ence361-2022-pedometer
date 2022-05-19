@@ -21,7 +21,6 @@
 int32_t *
 initCircBuf (circBuf_t *buffer, int32_t size)
 {
-    uint8_t i = 0;
 	buffer->windex = 0;
 	buffer->rindex = 0;
 	buffer->size = size;

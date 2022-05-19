@@ -45,25 +45,10 @@ typedef struct vector{
     int16_t z;
 } vector3_t;
 
-
-void refDelay (void);
-
-/*void initClock (void);
-
-void initDisplay (void);*/
-
-void delay_ms (uint32_t ms_delay);
-
-void delay_hz (uint32_t hz_delay);
-
-void displayUpdate (char *str1, char *str2, int32_t num, uint8_t charLine);
-
 void initAccl (void);
 
 vector3_t getAcclData (void);
 
 int32_t calcMean(int32_t sum, uint16_t i, circBuf_t *buffer);
-
-void updateDisplay (vector3_t acceleration_mean, int8_t relative_pitch, int8_t relative_roll);
 
 #endif /* READACC_H_ */

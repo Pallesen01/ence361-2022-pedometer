@@ -28,6 +28,7 @@
 #include "acc.h"
 #include "readRollPitch.h"
 #include "../OrbitOLED/OrbitOLEDInterface.h"
+#include "display.h"
 
 // *******************************************************
 // Globals to module
@@ -228,8 +229,7 @@ void upButtonIntHandler (void)
     }
 
     if (g_state != 6) {
-        vector3_t accData = {0,0,0};
-        updateDisplay(accData,0,0);
+        updateDisplay();
     }
 
 
@@ -262,8 +262,8 @@ void downButtonIntHandler (void)
             g_totalDistance -= 450;
         }
 
-        vector3_t accData = getAcclData();
-        updateDisplay(accData, 0,0);
+
+        updateDisplay();
     }
 
 
@@ -298,7 +298,7 @@ void (sidewaysButtonHandler) (void)
             g_state = 8;
         }
 
-        updateDisplay(accData, 0, 0);
+        updateDisplay();
 
         SysCtlDelay (SysCtlClockGet () / 15);
         GPIOIntClear(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
@@ -330,7 +330,7 @@ void (sidewaysButtonHandler) (void)
         }
 
 
-        updateDisplay(accData, 0, 0);
+        updateDisplay();
 
         SysCtlDelay (SysCtlClockGet () / 15);
         GPIOIntClear(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
