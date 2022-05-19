@@ -90,24 +90,19 @@ main (void)
 
     initCircBuf (&g_poti_circ_buff, BUFF_SIZE);
 
-    g_startUpSteps = 1234;
-    g_totalSteps = 5789;
-    g_startUpDistance = 1000;
-    g_totalDistance = 3200;
-    g_stepGoal = 10000;
+
+    g_totalSteps = 0;
+    g_totalDistance = 0;
+    g_stepGoal = 1000;
     uint16_t mainLoopHZ = 100;
 
     // Init variables for step tracking algorithm (Step 0)
     int32_t th; // threshold for current diff
-    int32_t diff; // (max - accZ(i))
-    int32_t curr_step_freq; // (1/(i-k))
     int32_t sample_num = 1; // i
     int32_t prev_step_sample = 0; // k
     int32_t max; // Max accel since k
     const int32_t a = 4000;
     const int32_t b = 3;
-    g_totalSteps = 0;
-
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
@@ -147,12 +142,7 @@ main (void)
 
         // Step Tracking Algorithm
 
-        diff = max - acceleration_mean.z;
-        curr_step_freq = (1/(sample_num-prev_step_sample));
-
         if (abs(acceleration_mean.x) > 150 || abs(acceleration_mean.y) > 150 ) {
-
-
 
             // Step 1
             th = a/(sample_num - prev_step_sample) + b;
@@ -213,9 +203,6 @@ main (void)
         }
 
         prevPotiVal = g_potiVal;
-
-
-
 
     }
 
