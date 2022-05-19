@@ -26,6 +26,4 @@ initSysTick (void);
 void
 initDisplay (void);
 
-
-
 #endif /* ADCINTERRUPTS_H_ */

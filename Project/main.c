@@ -47,8 +47,6 @@ uint8_t g_updateGoalScreen;
 
 uint32_t g_totalDistance;
 uint32_t g_totalSteps;
-uint32_t g_startUpSteps;
-uint32_t g_startUpDistance;
 
 
 /********************************************************
@@ -90,7 +88,6 @@ main (void)
 
     initCircBuf (&g_poti_circ_buff, BUFF_SIZE);
 
-
     g_totalSteps = 0;
     g_totalDistance = 0;
     g_stepGoal = 1000;
@@ -112,7 +109,7 @@ main (void)
     // Set first max value for step tracking
     max = acceleration_raw.z;
 
-    g_state = 8;
+    g_state = 1;
     g_units = 0;
     g_testState = 0;
 
@@ -142,7 +139,7 @@ main (void)
 
         // Step Tracking Algorithm
 
-        if (abs(acceleration_mean.x) > 150 || abs(acceleration_mean.y) > 150 ) {
+        //if (abs(acceleration_mean.x) > 150 || abs(acceleration_mean.y) > 150 ) {
 
             // Step 1
             th = a/(sample_num - prev_step_sample) + b;
@@ -164,7 +161,7 @@ main (void)
             sample_num++;
             g_totalDistance = g_totalSteps * 0.4;
 
-        }
+        //}
         // Step tracking algorithm ends
 
         // Buttons for reseting distance and steps
@@ -178,16 +175,14 @@ main (void)
                     downButPressed = 1;
                 }
 
-        if (g_state != 6) {
+        if (g_state != 2) {
             buttonTimer++;
 
-          if (g_state != 6 && buttonStatus == NO_CHANGE && downButPressed) {
+          if (g_state != 2 && buttonStatus == NO_CHANGE && downButPressed) {
               // If down button has been held for 0.6 seconds
             if (buttonTimer >= (0.6 * mainLoopHZ)) {
                 // Update step goal if button pressed for more than 2 seconds
-                g_startUpSteps = 0;
                 g_totalSteps = 0;
-                g_startUpDistance = 0;
                 g_totalDistance = 0;
                 OLEDStringDraw ("  distance and  ", 0, 2);
                 OLEDStringDraw ("   steps reset  ", 0, 3);
@@ -198,7 +193,8 @@ main (void)
         }
 
 
-        if (g_state == 6 && !similarValues(prevPotiVal,g_potiVal)) {
+        if (g_state == 2 && !similarValues(prevPotiVal,g_potiVal)) {
+            //If in the step goal state and the potentiometer value differs from the previous value
             updateDisplay();
         }
 

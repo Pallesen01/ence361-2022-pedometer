@@ -212,7 +212,7 @@ checkButton (uint8_t butName)
 void upButtonIntHandler (void)
 {
     GPIOIntDisable(DOWN_BUT_PORT_BASE, DOWN_BUT_PIN);
-    if (g_testState == 0 && g_state != 6) {
+    if (g_testState == 0 && g_state != 2) {
         //Switch is off
         // Not on step goal screen
         //change units
@@ -220,7 +220,7 @@ void upButtonIntHandler (void)
         if (g_units > 1) {
             g_units = 0;
         }
-    } else if (g_testState == 1 && g_state != 6) {
+    } else if (g_testState == 1 && g_state != 2) {
         //Switch is on
         // Not on step goal screen
         //Incriment steps and distance
@@ -228,7 +228,8 @@ void upButtonIntHandler (void)
         g_totalDistance += 90;
     }
 
-    if (g_state != 6) {
+    if (g_state != 2) {
+        //Update display if the state isn't in step goals
         updateDisplay();
     }
 
@@ -240,12 +241,16 @@ void upButtonIntHandler (void)
 void downButtonIntHandler (void)
 {
     GPIOIntDisable(UP_BUT_PORT_BASE, UP_BUT_PIN);
-    //display acc
 
-    if (g_testState == 0 && g_state == 6) {
+    //Down button has different uses depending on the state of the device
+
+    if (g_testState == 0 && g_state == 2) {
+        //If test mode isn't active and we're in the step goal state
         g_stepGoal = g_displayedStepGoal;
         OLEDStringDraw ("    Step goal   ", 0, 2);
         OLEDStringDraw ("     updated    ", 0, 3);
+
+        //Update step goal
 
     } else if (g_testState == 1) {
         //Test mode is active
@@ -254,14 +259,13 @@ void downButtonIntHandler (void)
             g_totalSteps = 0;
         } else {
             g_totalSteps -= 500;
-        }
+        } //Takes 500 of the total steps or takes it down to 0.
 
         if (g_totalDistance < 450) {
             g_totalDistance = 0;
         } else {
             g_totalDistance -= 450;
-        }
-
+        } //Takes distance (measured in meters by default) down by 450m or down to 0
 
         updateDisplay();
     }
@@ -276,26 +280,14 @@ void (sidewaysButtonHandler) (void)
     if (GPIOPinRead(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN)) {
         GPIOIntDisable(LEFT_BUT_PORT_BASE, LEFT_BUT_PIN);
 
-        vector3_t accData = getAcclData();
+        //Changing state depending on previous state
 
-        /*if (g_state == 4) {
-            g_state = 6;
-        } else if (g_state == 5) {
-            g_state = 8;
-        } else if (g_state == 6) {
-            g_state = 7;
-        } else if (g_state == 7) {
-            g_state = 8;
-        } else if (g_state == 8) {
-            g_state = 6;
-        } */
-
-        if (g_state == 8) {
-            g_state = 7;
-        } else if (g_state == 7) {
-            g_state = 6;
-        } else if (g_state == 6) {
-            g_state = 8;
+        if (g_state == 1) {
+            g_state = 3;
+        } else if (g_state == 3) {
+            g_state = 2;
+        } else if (g_state == 2) {
+            g_state = 1;
         }
 
         updateDisplay();
@@ -307,28 +299,15 @@ void (sidewaysButtonHandler) (void)
     } else if (GPIOPinRead(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN)) {
         GPIOIntDisable(RIGHT_BUT_PORT_BASE, RIGHT_BUT_PIN);
 
-        vector3_t accData = getAcclData();
+        //Changing state depending on previous state
 
-        /*if (g_state == 4) {
-            g_state = 5;
-        } else if (g_state == 5) {
-            g_state = 6;
-        } else if (g_state == 6) {
-            g_state = 4;
-        } else if (g_state == 7) {
-            g_state = 6;
-        } else if (g_state == 8) {
-            g_state = 5;
-        }*/
-
-        if (g_state == 8) {
-            g_state = 6;
-        } else if (g_state == 7) {
-            g_state = 8;
-        } else if (g_state == 6) {
-            g_state = 7;
+        if (g_state == 1) {
+            g_state = 2;
+        } else if (g_state == 3) {
+            g_state = 1;
+        } else if (g_state == 2) {
+            g_state = 3;
         }
-
 
         updateDisplay();
 

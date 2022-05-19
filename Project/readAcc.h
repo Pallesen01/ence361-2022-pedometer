@@ -27,8 +27,8 @@ extern uint32_t g_units;
 
 extern uint32_t g_totalDistance;
 extern uint32_t g_totalSteps;
-extern uint32_t g_startUpSteps;
-extern uint32_t g_startUpDistance;
+//extern uint32_t g_startUpSteps;
+//extern uint32_t g_startUpDistance;
 
 /**********************************************************
  * Constants

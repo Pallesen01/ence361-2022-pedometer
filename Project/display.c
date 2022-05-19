@@ -94,14 +94,14 @@ int32_t goalDisplayVal ()
  */
 void updateDisplay ()
 {
-    if (g_state == 6) {
+    if (g_state == 2) {
         OLEDStringDraw ("    Set goal    ", 0, 0);
         OLEDStringDraw ("                ", 0, 1);
         displayUpdate ("","", goalDisplayVal(), 2);
         OLEDStringDraw ("Steps", 8, 2);
         OLEDStringDraw ("                ", 0, 3);
 
-    } else if (g_state == 7)  {
+    } else if (g_state == 3)  {
         //Total distance
         OLEDStringDraw ("                ", 0, 3);
         if (g_units == 0) {
@@ -134,7 +134,7 @@ void updateDisplay ()
        OLEDStringDraw ("                ", 0, 1);
        OLEDStringDraw ("                ", 0, 2);
 
-    } else if (g_state == 8) {
+    } else if (g_state == 1) {
         //Total steps
         uint16_t percentageOfGoal;
         if (g_units == 1) {
