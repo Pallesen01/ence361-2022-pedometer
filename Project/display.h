@@ -50,6 +50,6 @@ void
 updateDisplay ();
 
 int
-similarValues(uint32_t val1, uint32_t val2)
+similarValues(uint32_t val1, uint32_t val2);
 
 #endif /* READACC_H_ */
