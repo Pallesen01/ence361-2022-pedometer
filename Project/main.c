@@ -100,6 +100,7 @@ main (void)
     int32_t max; // Max accel since k
     const int32_t a = 4000;
     const int32_t b = 3;
+    int32_t step_acc = 0;
 
     // Set reference orientation on start
     acceleration_raw = getAcclData();
@@ -107,7 +108,7 @@ main (void)
     int8_t roll = setReferenceRoll(acceleration_raw);
 
     // Set first max value for step tracking
-    max = acceleration_raw.z;
+    max = acceleration_raw.x;
 
     g_state = 1;
     g_units = 0;
@@ -139,29 +140,35 @@ main (void)
 
         // Step Tracking Algorithm
 
-        //if (abs(acceleration_mean.x) > 150 || abs(acceleration_mean.y) > 150 ) {
+        if (abs(acceleration_mean.x) > 150 || abs(acceleration_mean.y) > 150 ) {
+            if (acceleration_mean.x > acceleration_mean.y) {
+                step_acc = acceleration_mean.x;
+            } else {
+                step_acc = acceleration_mean.y;
+            }
+
 
             // Step 1
             th = a/(sample_num - prev_step_sample) + b;
 
             // Step 2
-            if ((max - acceleration_mean.z) >= th) {
+            if ((max - step_acc) >= th) {
                 // Step 3
                 g_totalSteps = g_totalSteps + 1;
                 // Update display if steps added
                 updateDisplay();
                 prev_step_sample = sample_num;
                 // Step 4
-                max = acceleration_mean.z;
-            } else if (acceleration_mean.z > max) {
+                max = step_acc;
+            } else if (step_acc > max) {
                 // Step 4
-                max = acceleration_mean.z;
+                max = step_acc;
             }
 
             sample_num++;
-            g_totalDistance = g_totalSteps * 0.4;
+            g_totalDistance = g_totalSteps * 0.9;
 
-        //}
+        }
         // Step tracking algorithm ends
 
         // Buttons for reseting distance and steps
