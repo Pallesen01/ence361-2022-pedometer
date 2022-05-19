@@ -34,6 +34,7 @@
 #include "readRollPitch.h"
 #include "driverlib/adc.h"
 #include "adcInterrupts.h"
+#include "display.h"
 
 uint32_t g_state;
 uint32_t g_units;
@@ -48,26 +49,6 @@ uint32_t g_totalDistance;
 uint32_t g_totalSteps;
 uint32_t g_startUpSteps;
 uint32_t g_startUpDistance;
-
-/**
- *Returns true if the two numbers entered are very close
- */
-int similarValues(uint32_t val1, uint32_t val2) {
-    uint8_t threshold = 2;
-    if (val1 >= val2) {
-        if (val1 - val2 <= threshold) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else {
-        if (val2 - val1 <= threshold) {
-            return 1;
-        } else {
-            return 0;
-        }
-}
-}
 
 
 /********************************************************
